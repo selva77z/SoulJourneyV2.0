@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4x4 Rasi Chart Mockup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+            margin: 0;
+        }
+        .chart-container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .rasi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            gap: 2px;
+            background: #333;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+        .house {
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .house-number {
+            font-weight: bold;
+            color: #666;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+        .sign {
+            font-weight: bold;
+            color: #333;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        .planets {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        .center {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .sample-data {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .sample-data h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-title">Rasi Chart - South Indian Style</div>
+        
+        <div class="rasi-grid">
+            <!-- Row 1 -->
+            <div class="house">
+                <div class="house-number">12</div>
+                <div class="sign">Libra</div>
+                <div class="planets"></div>
+            </div>
+            <div class="house">
+                <div class="house-number">1</div>
+                <div class="sign">Scorpio</div>
+                <div class="planets">Su Me Ve</div>
+            </div>
+            <div class="house">
+                <div class="house-number">2</div>
+                <div class="sign">Sagittarius</div>
+                <div class="planets">Sa</div>
+            </div>
+            <div class="house">
+                <div class="house-number">3</div>
+                <div class="sign">Capricorn</div>
+                <div class="planets"></div>
+            </div>
+            
+            <!-- Row 2 -->
+            <div class="house">
+                <div class="house-number">11</div>
+                <div class="sign">Virgo</div>
+                <div class="planets"></div>
+            </div>
+            <div class="center">RASI</div>
+            <div class="center">CHART</div>
+            <div class="house">
+                <div class="house-number">4</div>
+                <div class="sign">Aquarius</div>
+                <div class="planets">Mo</div>
+            </div>
+            
+            <!-- Row 3 -->
+            <div class="house">
+                <div class="house-number">10</div>
+                <div class="sign">Leo</div>
+                <div class="planets"></div>
+            </div>
+            <div class="center">25-11-1990</div>
+            <div class="center">3:10 AM</div>
+            <div class="house">
+                <div class="house-number">5</div>
+                <div class="sign">Pisces</div>
+                <div class="planets"></div>
+            </div>
+            
+            <!-- Row 4 -->
+            <div class="house">
+                <div class="house-number">9</div>
+                <div class="sign">Cancer</div>
+                <div class="planets">Ju</div>
+            </div>
+            <div class="house">
+                <div class="house-number">8</div>
+                <div class="sign">Gemini</div>
+                <div class="planets"></div>
+            </div>
+            <div class="house">
+                <div class="house-number">7</div>
+                <div class="sign">Taurus</div>
+                <div class="planets">Ma</div>
+            </div>
+            <div class="house">
+                <div class="house-number">6</div>
+                <div class="sign">Aries</div>
+                <div class="planets"></div>
+            </div>
+        </div>
+        
+        <div class="sample-data">
+            <h3>Sample Data (Nov 25, 1990 - 3:10 AM Pudukkottai)</h3>
+            <strong>Planet Positions:</strong><br>
+            Su (Sun): 9°32' Scorpio → House 1<br>
+            Mo (Moon): 4°38' Aquarius → House 4<br>
+            Ma (Mars): 13°18' Taurus → House 7<br>
+            Me (Mercury): 27°45' Scorpio → House 1<br>
+            Ju (Jupiter): 20°30' Cancer → House 9<br>
+            Ve (Venus): 15°23' Scorpio → House 1<br>
+            Sa (Saturn): 28°43' Sagittarius → House 2<br>
+            <br>
+            <strong>Chart Features:</strong><br>
+            • 4x4 grid layout (South Indian style)<br>
+            • Houses 1-12 in clockwise order<br>
+            • Center shows chart title and birth details<br>
+            • Planets shown with abbreviations<br>
+            • Clear house numbers and zodiac signs
+        </div>
+    </div>
+</body>
+</html>

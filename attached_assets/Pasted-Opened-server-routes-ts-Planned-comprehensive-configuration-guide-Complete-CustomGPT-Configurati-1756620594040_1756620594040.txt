@@ -1,0 +1,88 @@
+Opened server/routes.ts
+
+Planned comprehensive configuration guide
+📋 Complete CustomGPT Configuration & Data Flow
+Here's exactly how your ChatGPT integration works:
+
+1️⃣ ChatGPT Actions Configuration
+In your CustomGPT settings, add this action:
+
+Schema: Import the chatgpt-actions-schema.json file
+Server URL: https://YOUR-REPLIT-APP.replit.app
+Authentication: API Key (Header)
+Header Name: X-API-Key
+API Key: sk-astro-webapp-2025-secure-api-key-xyz789
+2️⃣ How Data Flows When You Post from ChatGPT
+Step 1: ChatGPT sends data → Your endpoint receives:
+
+{
+  "name": "John Doe",
+  "birthDate": "1990-11-25", 
+  "birthTime": "03:17:25",
+  "birthPlace": "Chennai, India",
+  "latitude": "13.08",
+  "longitude": "80.27"
+}
+Step 2: API validates → Checks:
+
+✅ API key authentication (line 679-692)
+✅ Required fields validation (line 717-721)
+✅ Creates/finds GPT user account (line 741-755)
+Step 3: Saves to database → Creates:
+
+Birth data entry with all details (line 758-800)
+Stored with ID for future reference
+Step 4: Generates KP chart → Calculates:
+
+Calls Python Swiss Ephemeris script (line 811-816)
+Gets real planetary positions with KP-Newcomb ayanamsa
+Includes Rasi & Navamsa positions
+Step 5: Stores chart data → Saves:
+
+Complete chart in PostgreSQL (line 823-834)
+Links to birth data ID
+Ready for analysis
+Step 6: Returns to ChatGPT → Complete response with:
+
+{
+  "success": true,
+  "data": {
+    "savedBirthData": {...},
+    "personalInfo": {...},
+    "location": {...},
+    "chart": {
+      "planets": [
+        {
+          "planet": "Sun",
+          "sign": "Gemini",
+          "degree": "18° 47'",
+          "nakshatra": "Ardra",
+          "pada": 4
+        }
+        // All 9 planets...
+      ]
+    }
+  }
+}
+3️⃣ Available API Endpoints
+POST /api/gpt/process-birth-data - Push birth data & generate charts
+GET /api/gpt/pull-charts - Retrieve stored charts with filters
+GET /api/gpt/search-charts - Search by astrological criteria
+GET /api/gpt/available-years - Get data range for filtering
+
+4️⃣ Processing Details
+Your system:
+
+Authenticates using secure API key
+Validates all incoming data
+Calculates using authentic Swiss Ephemeris
+Stores in PostgreSQL for research
+Returns complete astrological analysis
+The entire process takes ~7 seconds and provides professional-grade KP astrology calculations that ChatGPT can use for readings and analysis!
+
+Checkpoint made
+just now
+Update Replit configuration to correctly integrate OpenAI and database tools
+Screenshot
+Load preview
+58 seconds of work

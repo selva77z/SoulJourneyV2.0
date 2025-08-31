@@ -1,0 +1,68 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Soul Journey Astrology API",
+    "version": "1.0.0",
+    "description": "API for processing birth data and generating astrology charts"
+  },
+  "servers": [
+    {
+      "url": "https://99e05497-dc40-4026-807e-88dd2b97cad5-00-2z3pasrq7lpea.janeway.replit.dev"
+    }
+  ],
+  "paths": {
+    "/api/gpt/process-birth-data": {
+      "post": {
+        "summary": "Process birth data and generate astrology chart",
+        "operationId": "processBirthData",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Full name of the person"
+                  },
+                  "birthDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Birth date in YYYY-MM-DD format"
+                  },
+                  "birthTime": {
+                    "type": "string",
+                    "description": "Birth time in HH:MM:SS format (24-hour)"
+                  },
+                  "birthPlace": {
+                    "type": "string",
+                    "description": "Full birth location (city, state, country)"
+                  },
+                  "latitude": {
+                    "type": "string",
+                    "description": "Latitude in decimal degrees (optional)"
+                  },
+                  "longitude": {
+                    "type": "string",
+                    "description": "Longitude in decimal degrees (optional)"
+                  },
+                  "generateChart": {
+                    "type": "boolean",
+                    "description": "Whether to generate the chart (default: true)"
+                  }
+                },
+                "required": ["name", "birthDate", "birthTime", "birthPlace"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Birth data processed successfully"
+          }
+        }
+      }
+    }
+  }
+}

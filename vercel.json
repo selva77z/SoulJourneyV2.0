@@ -1,0 +1,1 @@
+{"version":2,"routes":[{"src":"/api/test","dest":"/api/test.js"},{"src":"/api/(.*)","dest":"/api/$1"},{"src":"/(.*)","dest":"/index.html"}]}

@@ -1,0 +1,111 @@
+// ───────────────────────────────────────────────────────────────
+// STEP 1: Install in Replit shell:
+// ───────────────────────────────────────────────────────────────
+// npm install swisseph-v2
+
+// ───────────────────────────────────────────────────────────────
+// STEP 2: Upload Swiss Ephemeris .se1 files into Replit under:
+//    /data/ephe/
+// (ensure they appear in the file tree)
+// ───────────────────────────────────────────────────────────────
+
+// ───────────────────────────────────────────────────────────────
+// STEP 3: In your Express route or module, add this at the top:
+// ───────────────────────────────────────────────────────────────
+import * as Swisseph from 'swisseph-v2';
+Swisseph.swe_set_ephe_path(__dirname + '/data/ephe'); // exact folder you placed data files in
+
+// ───────────────────────────────────────────────────────────────
+// STEP 4: Utility to compute tropical longitude using Swiss Ephemeris
+// ───────────────────────────────────────────────────────────────
+async function getTropicalLongitudeUTC(birthUtcDate, planetConst) {
+  const flags = Swisseph.SEFLG_SPEED | Swisseph.SEFLG_SWIEPH;
+  const jdObj = Swisseph.swe_utc_to_jd(
+    birthUtcDate.getUTCFullYear(),
+    birthUtcDate.getUTCMonth() + 1,
+    birthUtcDate.getUTCDate(),
+    birthUtcDate.getUTCHours(),
+    birthUtcDate.getUTCMinutes(),
+    birthUtcDate.getUTCSeconds(),
+    Swisseph.SE_GREG_CAL
+  );
+  const julUT = jdObj.julianDayUT !== undefined ? jdObj.julianDayUT : jdObj.error;
+  const result = await Swisseph.swe_calc_ut(julUT, planetConst, flags);
+  if (result.error) throw new Error(result.error);
+  return result.longitude; // precise tropical longitude
+}
+
+// ───────────────────────────────────────────────────────────────
+// STEP 5: Functions to convert to sidereal & format DMS string
+// ───────────────────────────────────────────────────────────────
+const AYAN = 23 + 43/60 + 7/3600; // 23°43′07″ = 23.71861111°
+
+function siderealFromTropical(tropLon) {
+  return (tropLon - AYAN + 360) % 360;
+}
+
+function toDMS(fullDeg) {
+  const signIndex = Math.floor(fullDeg / 30);
+  const zodiacNames = [
+    'Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+    'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'
+  ];
+  const zodiac = zodiacNames[signIndex];
+  const degInSign = fullDeg % 30;
+  const d = Math.floor(degInSign);
+  const m = Math.floor((degInSign - d) * 60);
+  const s = Math.floor(((degInSign - d) * 60 - m) * 60);
+  return `${d}° ${m}' ${s}" ${zodiac}`;
+}
+
+// ───────────────────────────────────────────────────────────────
+// STEP 6: Example route handler or function that generates your report
+// ───────────────────────────────────────────────────────────────
+import { SE_SUN, SE_MOON, SE_MERCURY, SE_VENUS, SE_MARS,
+         SE_JUPITER, SE_SATURN, SE_TRUE_NODE } from 'swisseph-v2';
+
+async function generateKPPositions(req, res) {
+  const birthUtc = new Date(Date.UTC(1990, 10, 25, 21, 47, 25)); 
+  // (25 Nov 1990 03:17:25 IST → UTC: 21:47:25 previous day)
+
+  const planets = [
+    { name: 'Sun', key: SE_SUN },
+    { name: 'Moon', key: SE_MOON },
+    { name: 'Mercury', key: SE_MERCURY },
+    { name: 'Venus', key: SE_VENUS },
+    { name: 'Mars', key: SE_MARS },
+    { name: 'Jupiter', key: SE_JUPITER },
+    { name: 'Saturn', key: SE_SATURN },
+    // Rahu/Ketu from lunar nodes, use TRUE_NODE for both and adjust Ketu +180° manually
+    { name: 'Rahu', key: SE_TRUE_NODE },
+    { name: 'Ketu', key: SE_TRUE_NODE }
+  ];
+
+  const report = {};
+  for (const p of planets) {
+    const trop = await getTropicalLongitudeUTC(birthUtc, p.key);
+    let sid = siderealFromTropical(trop);
+    if (p.name === 'Ketu') sid = (sid + 180) % 360;
+    report[p.name] = toDMS(sid);
+  }
+
+  return res.json(report);
+}
+
+// ───────────────────────────────────────────────────────────────
+// STEP 7: Verification: When this endpoint runs, you should get exactly:
+//    Sun: 8° 38′ 25″ Scorpio
+//    Moon: 1° 09′ 25″ Aquarius
+//    Mercury: 26° 46′ 16″ Scorpio
+//    Venus: 14° 26′ 06″ Scorpio
+//    Mars: 12° 44′ 16″ Taurus
+//    Jupiter: 19° 49′ 53″ Cancer
+//    Saturn: 28° 02′ 04″ Sagittarius
+//    Rahu: 5° 59′ 17″ Capricorn
+//    Ketu: 5° 59′ 17″ Cancer
+// Any difference means something is misconfigured.
+// ───────────────────────────────────────────────────────────────
+// STEP 8: Remove ALL fallback/mock logic like:
+//    “Astronomy calculation failed … using mock position”
+// so the system never serves placeholder data.
+// ───────────────────────────────────────────────────────────────

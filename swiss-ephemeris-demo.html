@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiss Ephemeris KP Astrology - Complete Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .planet-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px 60px;
+            gap: 10px;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .planet-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .planet-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .retrograde {
+            color: #f5576c;
+            font-weight: bold;
+        }
+
+        .house-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            gap: 10px;
+            padding: 8px;
+            margin: 3px 0;
+            background: #f0f8ff;
+            border-radius: 6px;
+        }
+
+        .transit-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px;
+            gap: 10px;
+            padding: 8px;
+            margin: 3px 0;
+            background: #f0fff0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63384;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #e6ffe6;
+            color: #198754;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .technical-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .nakshatra-badge {
+            background: #667eea;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .sub-lord-badge {
+            background: #f5576c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .planet-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Swiss Ephemeris KP Astrology</h1>
+            <p>Professional-Grade Planetary Calculations with KP Sub-Lords & Advanced Analysis</p>
+        </div>
+
+        <div class="controls">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" value="Test Person" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label for="birthDate">Birth Date</label>
+                    <input type="date" id="birthDate" value="1990-11-03">
+                </div>
+                <div class="form-group">
+                    <label for="birthTime">Birth Time</label>
+                    <input type="time" id="birthTime" value="11:31:29" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="birthPlace">Birth Place</label>
+                    <input type="text" id="birthPlace" value="Tamil Nadu, India" placeholder="City, Country">
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-primary" onclick="calculateChart()">
+                    🔮 Calculate KP Chart
+                </button>
+                <button class="btn btn-secondary" onclick="getCurrentTransits()">
+                    🌟 Current Transits
+                </button>
+                <button class="btn btn-info" onclick="getAdvancedAnalysis()">
+                    📊 Advanced Analysis
+                </button>
+            </div>
+        </div>
+
+        <div id="results" class="results-grid">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001/api';
+
+        async function calculateChart() {
+            const name = document.getElementById('name').value;
+            const birthDate = document.getElementById('birthDate').value;
+            const birthTime = document.getElementById('birthTime').value;
+            const birthPlace = document.getElementById('birthPlace').value;
+
+            showLoading('Calculating chart with Swiss Ephemeris...');
+
+            try {
+                const response = await fetch(`${API_BASE}/horoscopes/simple`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        birthDate,
+                        birthTime,
+                        birthPlace
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayChart(data.chart);
+                } else {
+                    showError('Failed to calculate chart: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        async function getCurrentTransits() {
+            showLoading('Fetching current planetary transits...');
+
+            try {
+                const response = await fetch(`${API_BASE}/transits/current`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTransits(data);
+                } else {
+                    showError('Failed to fetch transits: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        async function getAdvancedAnalysis() {
+            const name = document.getElementById('name').value;
+            const birthDate = document.getElementById('birthDate').value;
+            const birthTime = document.getElementById('birthTime').value;
+            const birthPlace = document.getElementById('birthPlace').value;
+
+            showLoading('Generating advanced KP analysis...');
+
+            try {
+                const response = await fetch(`${API_BASE}/horoscopes/advanced`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        birthDate,
+                        birthTime,
+                        birthPlace
+                    })
+                });
+
+                const data = await response.json();
+                displayAdvancedAnalysis(data);
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        function showLoading(message) {
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('results').innerHTML = `
+                <div class="error">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+        }
+
+        function displayChart(chart) {
+            const planetsHtml = chart.planetary_positions.map(planet => `
+                <div class="planet-item">
+                    <div class="planet-name">${planet.planet}</div>
+                    <div class="planet-details">
+                        ${planet.degree} ${planet.sign}
+                        <br>
+                        <span class="nakshatra-badge">${planet.nakshatra || 'N/A'}</span>
+                        <span class="sub-lord-badge">Sub: ${planet.sub_lord || 'N/A'}</span>
+                    </div>
+                    <div>House ${planet.house}</div>
+                    <div class="${planet.retrograde ? 'retrograde' : ''}">${planet.retrograde ? 'R' : 'D'}</div>
+                </div>
+            `).join('');
+
+            const housesHtml = chart.houses ? chart.houses.map(house => `
+                <div class="house-item">
+                    <div><strong>H${house.house}</strong></div>
+                    <div>${house.cusp_degree} ${house.sign}</div>
+                    <div><span class="sub-lord-badge">${house.sub_lord}</span></div>
+                </div>
+            `).join('') : '<div>House data not available</div>';
+
+            document.getElementById('results').innerHTML = `
+                <div class="card">
+                    <h3>🌍 Birth Information</h3>
+                    <div><strong>Name:</strong> ${chart.name}</div>
+                    <div><strong>Date:</strong> ${chart.birthDate}</div>
+                    <div><strong>Time:</strong> ${chart.birthTime}</div>
+                    <div><strong>Place:</strong> ${chart.birthPlace}</div>
+                    <div class="technical-info">
+                        <strong>Ayanamsa:</strong> ${chart.ayanamsa?.formatted || 'N/A'} (${chart.ayanamsa?.system || 'N/A'})<br>
+                        <strong>Calculation:</strong> ${chart.technical_info?.calculation_method || 'Swiss Ephemeris'}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🪐 Planetary Positions</h3>
+                    ${planetsHtml}
+                </div>
+
+                <div class="card">
+                    <h3>🏠 House Cusps</h3>
+                    ${housesHtml}
+                </div>
+
+                <div class="card">
+                    <h3>📋 Interpretation</h3>
+                    <div style="white-space: pre-line; line-height: 1.6;">
+                        ${chart.interpretation || 'No interpretation available.'}
+                    </div>
+                </div>
+
+                ${chart.special_points ? `
+                <div class="card">
+                    <h3>⭐ Special Points</h3>
+                    <div><strong>Ascendant:</strong> ${chart.special_points.ascendant?.degree} ${chart.special_points.ascendant?.sign}</div>
+                    <div><strong>Midheaven:</strong> ${chart.special_points.midheaven?.degree} ${chart.special_points.midheaven?.sign}</div>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function displayTransits(data) {
+            const transitsHtml = data.transits.map(planet => `
+                <div class="transit-item">
+                    <div class="planet-name">${planet.planet}</div>
+                    <div class="planet-details">
+                        ${planet.degree} ${planet.sign}
+                        <br>
+                        <span class="nakshatra-badge">${planet.nakshatra || 'N/A'}</span>
+                        <span style="font-size: 0.8rem;">Speed: ${planet.speed}°/day</span>
+                    </div>
+                    <div class="${planet.retrograde ? 'retrograde' : ''}">${planet.retrograde ? 'Retrograde' : 'Direct'}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('results').innerHTML = `
+                <div class="card">
+                    <h3>🌟 Current Planetary Transits</h3>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Calculation Time:</strong> ${new Date(data.calculation_time).toLocaleString()}
+                    </div>
+                    ${transitsHtml}
+                    <div class="technical-info">
+                        <strong>Ayanamsa:</strong> ${data.ayanamsa?.formatted || 'N/A'}<br>
+                        Live planetary positions calculated with Swiss Ephemeris precision
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Transit Analysis</h3>
+                    <div style="line-height: 1.6;">
+                        <strong>Key Observations:</strong><br>
+                        • Saturn is ${data.transits.find(p => p.planet === 'Saturn')?.retrograde ? 'Retrograde' : 'Direct'} - ${data.transits.find(p => p.planet === 'Saturn')?.retrograde ? 'Time for introspection and review' : 'Moving forward with structure'}<br>
+                        • Jupiter in ${data.transits.find(p => p.planet === 'Jupiter')?.sign} - Expansion in ${data.transits.find(p => p.planet === 'Jupiter')?.sign} themes<br>
+                        • Mars in ${data.transits.find(p => p.planet === 'Mars')?.sign} - Energy directed towards ${data.transits.find(p => p.planet === 'Mars')?.sign} activities<br>
+                        <br>
+                        <strong>Note:</strong> These are real-time planetary positions calculated using the Swiss Ephemeris library.
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAdvancedAnalysis(data) {
+            if (data.success) {
+                document.getElementById('results').innerHTML = `
+                    <div class="card">
+                        <h3>🔮 Advanced KP Analysis</h3>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Analysis for:</strong> ${data.advanced_analysis.name}<br>
+                            <strong>Birth:</strong> ${data.advanced_analysis.birthDate} ${data.advanced_analysis.birthTime}<br>
+                            <strong>Place:</strong> ${data.advanced_analysis.birthPlace}
+                        </div>
+                        <div><strong>Features Available:</strong></div>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            ${data.advanced_analysis.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                        <div class="technical-info">
+                            <strong>Calculation Method:</strong> ${data.advanced_analysis.calculation_method}<br>
+                            <strong>Raw Output:</strong><br>
+                            <pre style="max-height: 300px; overflow-y: auto; font-size: 0.8rem;">${data.advanced_analysis.raw_output}</pre>
+                        </div>
+                    </div>
+                `;
+            } else {
+                showError('Advanced analysis failed: ' + (data.error || 'Unknown error'));
+            }
+        }
+
+        // Initialize with default calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateChart();
+        });
+    </script>
+</body>
+</html>

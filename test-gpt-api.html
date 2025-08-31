@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test GPT API</title>
+</head>
+<body>
+    <h2>Test GPT Astrology API</h2>
+    
+    <script>
+    async function testAPI() {
+        try {
+            const response = await fetch('/api/gpt/process-birth-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: "Imran",
+                    gender: "Male",
+                    birthDate: "1990-11-03",
+                    birthTime: "11:31:29",
+                    birthPlace: "Colombo",
+                    state: "Western",
+                    country: "Sri Lanka",
+                    latitude: "6.927079",
+                    longitude: "79.861244",
+                    generateChart: true
+                })
+            });
+            
+            const data = await response.json();
+            console.log('API Response:', data);
+            
+            document.body.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        } catch (error) {
+            console.error('Error:', error);
+            document.body.innerHTML += '<p>Error: ' + error.message + '</p>';
+        }
+    }
+    
+    // Test the API when page loads
+    testAPI();
+    </script>
+</body>
+</html>

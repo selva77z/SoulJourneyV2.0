@@ -1,0 +1,144 @@
+"Re-import all necessary modules due to code environment reset
+from datetime import datetime, timedelta
+import swisseph as swe
+import pandas as pd
+import ace_tools as tools
+
+# Set ephemeris path
+swe.set_ephe_path('/mnt/data')
+
+# Re-define constants
+ayanamsa_value = 23 + 43/60 + 7/3600  # KP-Newcomb Ayanamsa
+nak_length = 13.3333
+vimshottari_dasa = {
+    ""Ketu"": 7, ""Venus"": 20, ""Sun"": 6, ""Moon"": 10, ""Mars"": 7,
+    ""Rahu"": 18, ""Jupiter"": 16, ""Saturn"": 19, ""Mercury"": 17
+}
+dasa_sequence = [""Ketu"", ""Venus"", ""Sun"", ""Moon"", ""Mars"", ""Rahu"", ""Jupiter"", ""Saturn"", ""Mercury""]
+total_dasa_years = sum(vimshottari_dasa.values())
+sub_divisions = {
+    planet: (vimshottari_dasa[planet] / total_dasa_years) * nak_length
+    for planet in dasa_sequence
+}
+sign_names = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+              'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+rasi_lords = {
+    'Aries': 'Mars', 'Taurus': 'Venus', 'Gemini': 'Mercury', 'Cancer': 'Moon',
+    'Leo': 'Sun', 'Virgo': 'Mercury', 'Libra': 'Venus', 'Scorpio': 'Mars',
+    'Sagittarius': 'Jupiter', 'Capricorn': 'Saturn', 'Aquarius': 'Saturn', 'Pisces': 'Jupiter'
+}
+nakshatras = [
+    (""Ashwini"", ""Ketu""), (""Bharani"", ""Venus""), (""Krittika"", ""Sun""), (""Rohini"", ""Moon""),
+    (""Mrigashira"", ""Mars""), (""Ardra"", ""Rahu""), (""Punarvasu"", ""Jupiter""), (""Pushya"", ""Saturn""),
+    (""Ashlesha"", ""Mercury""), (""Magha"", ""Ketu""), (""Purva Phalguni"", ""Venus""), (""Uttara Phalguni"", ""Sun""),
+    (""Hasta"", ""Moon""), (""Chitra"", ""Mars""), (""Swati"", ""Rahu""), (""Vishakha"", ""Jupiter""),
+    (""Anuradha"", ""Saturn""), (""Jyeshtha"", ""Mercury""), (""Mula"", ""Ketu""), (""Purva Ashadha"", ""Venus""),
+    (""Uttara Ashadha"", ""Sun""), (""Shravana"", ""Moon""), (""Dhanishta"", ""Mars""), (""Shatabhisha"", ""Rahu""),
+    (""Purva Bhadrapada"", ""Jupiter""), (""Uttara Bhadrapada"", ""Saturn""), (""Revati"", ""Mercury"")
+]
+planets = {
+    ""Sun"": swe.SUN,
+    ""Moon"": swe.MOON,
+    ""Mercury"": swe.MERCURY,
+    ""Venus"": swe.VENUS,
+    ""Mars"": swe.MARS,
+    ""Jupiter"": swe.JUPITER,
+    ""Saturn"": swe.SATURN,
+    ""Rahu"": swe.TRUE_NODE,
+    ""Ketu"": swe.TRUE_NODE
+}
+def get_full_kp_chain(nak_deg):
+    cumulative = 0
+    for planet1 in dasa_sequence:
+        cumulative += sub_divisions[planet1]
+        if nak_deg <= cumulative:
+            sub_start = cumulative - sub_divisions[planet1]
+            sub_len = sub_divisions[planet1]
+            rel_deg = nak_deg - sub_start
+            cumulative2 = 0
+            for planet2 in dasa_sequence:
+                cumulative2 += (vimshottari_dasa[planet2] / total_dasa_years) * sub_len
+                if rel_deg <= cumulative2:
+                    sub2_start = cumulative2 - (vimshottari_dasa[planet2] / total_dasa_years) * sub_len
+                    sub2_len = (vimshottari_dasa[planet2] / total_dasa_years) * sub_len
+                    rel_deg2 = rel_deg - sub2_start
+                    cumulative3 = 0
+                    for planet3 in dasa_sequence:
+                        cumulative3 += (vimshottari_dasa[planet3] / total_dasa_years) * sub2_len
+                        if rel_deg2 <= cumulative3:
+                            return (planet1, planet2, planet3)
+    return (dasa_sequence[-1], dasa_sequence[-1], dasa_sequence[-1])
+
+# Compute KP planetary report for 26-Aug-1956, 17:22 IST, Agra
+birth_datetime = datetime(1956, 8, 26, 17, 22)
+timezone_offset = timedelta(hours=5, minutes=30)
+utc_datetime = birth_datetime - timezone_offset
+jd = swe.julday(utc_datetime.year, utc_datetime.month, utc_datetime.day,
+                utc_datetime.hour + utc_datetime.minute / 60.0)
+
+# Build planetary KP table
+results = []
+for planet, id in planets.items():
+    lon = swe.calc_ut(jd, id)[0][0]
+    if planet == ""Ketu"":
+        lon = (swe.calc_ut(jd, swe.TRUE_NODE)[0][0] + 180.0) % 360
+    sidereal_lon = (lon - ayanamsa_value) % 360
+    nak_index = int(sidereal_lon // nak_length)
+    nak_name, stl = nakshatras[nak_index]
+    nak_deg = sidereal_lon % nak_length
+    pada = int(nak_deg // (nak_length / 4)) + 1
+    ral = rasi_lords[sign_names[int(sidereal_lon // 30)]]
+    sbl, ssl, sssl = get_full_kp_chain(nak_deg)
+    deg = int(sidereal_lon % 30)
+    minute = int((sidereal_lon % 1) * 60)
+    zodiac = sign_names[int(sidereal_lon // 30)]
+
+    results.append({
+        ""Planet"": planet,
+        ""Sidereal Position"": f""{deg}°{minute:02d}' {zodiac}"",
+        ""Nakshatra"": f""{nak_name} ({pada})"",
+        ""RAL"": ral,
+        ""STL"": stl,
+        ""SBL"": sbl,
+        ""SSL"": ssl,
+        ""SSSL"": sssl
+    })
+
+df_kp_1956 = pd.DataFrame(results)
+tools.display_dataframe_to_user(name=""KP Report for 26-Aug-1956, 17:22 IST, Agra"", dataframe=df_kp_1956) to geneetre one for Birth Place
+State
+Country
+Rectified Time
+Given Time
+Correction
+Longitude
+Day
+Date
+Ayanamsa
+Latitude
+Sun Set
+Time Zone
+Sun Rise
+Tithi
+Dasa Balance
+Hora
+Current Dasa
+Lagna
+Rasi
+Star
+: Imran
+: Male
+: 34 Y, 3 M, 4 D
+: Colombo
+: Western
+: Sri Lanka
+: 03-11-1990
+: Saturday
+: 11:31:29 Am
+: 11:31:00 Pm
+: 079º 50' 52"" E
+: 006º 55' 55"" N
+: Standard Time
+: +05:30 GMT
+: 23° 43' 04"" (KP-Newcomb)
+: 05:58:06 Am"

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colombo KP Birth Chart - Bharani Star</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2b 0%, #1a1a3e 50%, #2d1b69 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #b8b8ff;
+            margin-bottom: 30px;
+        }
+        
+        .birth-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .detail-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+        }
+        
+        .detail-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .detail-card p {
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+        
+        .planets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .planet-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .planet-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .planet-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .planet-details div {
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .planet-details div:last-child {
+            border-bottom: none;
+        }
+        
+        .zodiac { color: #ff6b6b; font-weight: bold; }
+        .degree { color: #4ecdc4; font-weight: bold; }
+        .nakshatra { color: #45b7d1; font-weight: bold; }
+        
+        .loading {
+            text-align: center;
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin: 40px 0;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.1rem;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Colombo KP Birth Chart 🌟</h1>
+        <p class="subtitle">Bharani Star (3rd Pada) - Authentic KP-Newcomb Calculations</p>
+        
+        <div class="birth-details">
+            <div class="detail-card">
+                <h3>📅 Birth Date</h3>
+                <p>03-11-1990<br>
+                Saturday</p>
+            </div>
+            <div class="detail-card">
+                <h3>🕐 Birth Time</h3>
+                <p>11:31:29 AM<br>
+                Sri Lanka Time</p>
+            </div>
+            <div class="detail-card">
+                <h3>📍 Birth Place</h3>
+                <p>Colombo, Sri Lanka<br>
+                Commercial Capital</p>
+            </div>
+            <div class="detail-card">
+                <h3>🌍 Coordinates</h3>
+                <p>006° 55' 55" N<br>
+                079° 50' 52" E</p>
+            </div>
+            <div class="detail-card">
+                <h3>⭐ Birth Star</h3>
+                <p>Bharani (3)<br>
+                Venus Ruled</p>
+            </div>
+            <div class="detail-card">
+                <h3>🔄 Ayanamsa</h3>
+                <p>23° 43' 04"<br>
+                KP-Newcomb</p>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; color: #ffd700; margin: 40px 0;">🪐 Planetary Positions (KP-Newcomb System)</h2>
+
+        <div class="planets-grid" id="planetsGrid">
+            <div class="loading">Loading authentic KP planetary positions...</div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display planetary positions for Colombo birth
+        async function loadColomboChart() {
+            try {
+                const response = await fetch('/api/horoscopes/simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: "Colombo KP Chart",
+                        birthDate: "1990-11-03",
+                        birthTime: "11:31",
+                        birthPlace: "Colombo, Sri Lanka"
+                    })
+                });
+                
+                const data = await response.json();
+                const planetsGrid = document.getElementById('planetsGrid');
+                
+                console.log('Received Colombo chart data:', data);
+                
+                if (data.chartData && data.chartData.planets) {
+                    planetsGrid.innerHTML = ''; // Clear loading message
+                    
+                    data.chartData.planets.forEach(planet => {
+                        const planetCard = document.createElement('div');
+                        planetCard.className = 'planet-card';
+                        planetCard.innerHTML = `
+                            <div class="planet-name">${planet.name}</div>
+                            <div class="planet-details">
+                                <div>Zodiac Sign: <span class="zodiac">${planet.sign}</span></div>
+                                <div>Degree: <span class="degree">${planet.degree}</span></div>
+                                <div>House: ${planet.house}</div>
+                                <div>Nakshatra: <span class="nakshatra">${planet.star}</span></div>
+                                <div>Star Lord: ${planet.starLord || 'Calculating...'}</div>
+                                <div>Sub Lord: ${planet.subLord || 'Calculating...'}</div>
+                                <div>Rasi Lord: ${planet.rasi || 'Calculating...'}</div>
+                            </div>
+                        `;
+                        planetsGrid.appendChild(planetCard);
+                    });
+                    
+                    // Update ayanamsa display if available
+                    if (data.chartData.ayanamsa) {
+                        const ayanamsaCard = document.querySelector('.detail-card:last-child p');
+                        if (ayanamsaCard) {
+                            ayanamsaCard.innerHTML = `${data.chartData.ayanamsa}<br>KP-Newcomb`;
+                        }
+                    }
+                } else {
+                    planetsGrid.innerHTML = '<div class="error">Failed to load chart data. Please check console for details.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading Colombo chart:', error);
+                document.getElementById('planetsGrid').innerHTML = 
+                    '<div class="error">Error loading planetary data. Please refresh the page.</div>';
+            }
+        }
+
+        // Load chart when page loads
+        document.addEventListener('DOMContentLoaded', loadColomboChart);
+    </script>
+</body>
+</html>
