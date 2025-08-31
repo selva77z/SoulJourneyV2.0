@@ -1,37 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-<<<<<<< HEAD
-import { spawn } from 'child_process';
-import path from 'path';
-
-// API Key authentication middleware for GPT endpoints
-const gptApiKeyAuth = (req: any, res: any, next: any) => {
-  const apiKey = req.headers['x-api-key'];
-  const validApiKey = 'sk-astro-webapp-2025-secure-api-key-xyz789';
-  
-  if (!apiKey) {
-    return res.status(401).json({ 
-      success: false, 
-      error: 'API key missing. Include X-API-Key header.' 
-    });
-  }
-  
-  if (apiKey !== validApiKey) {
-    return res.status(401).json({ 
-      success: false, 
-      error: 'Invalid API key' 
-    });
-  }
-  
-  next();
-};
-=======
 import { calculateKPPlanets, AYANAMSA_VALUE } from "./kp-calculations.js";
 import { registerMobileRoutes } from "./mobile-routes";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerAIRoutes } from "./ai-routes";
->>>>>>> 60e34bc1a906c328ecff2bcedfa1808f3b2c501b
 
 // Simple middleware to bypass authentication in development
 const isAuthenticated = (req: any, res: any, next: any) => {
@@ -121,26 +94,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json({ message: "API is working", timestamp: new Date().toISOString() });
   });
 
-<<<<<<< HEAD
-  // GPT endpoint to process birth data and save chart (requires API key)
-  app.post('/api/gpt/process-birth-data', gptApiKeyAuth, async (req, res) => {
-    try {
-      res.setHeader('Content-Type', 'application/json');
-      const { name, birthDate, birthTime, birthPlace, latitude, longitude, generateChart = true } = req.body;
-      
-      console.log(`GPT Request - Processing birth data for: ${name}, ${birthDate}, ${birthTime}, ${birthPlace}`);
-      
-      if (!generateChart) {
-        return res.json({ 
-          success: true, 
-          message: "Birth data received but chart generation skipped",
-          data: { name, birthDate, birthTime, birthPlace }
-        });
-      }
-
-      // Calculate actual planetary positions using Swiss Ephemeris
-      const chartData: any = await calculateSwissEphemerisPositions(birthDate, birthTime, latitude, longitude, birthPlace);
-=======
   // KP horoscope endpoint with authentic astronomical calculations
   app.post('/api/horoscopes/simple', async (req, res) => {
     try {
@@ -207,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Find ascendant (Lagna) - for now using first planet's sign as approximation
       const lagna = realPlanets.length > 0 ? `${realPlanets[0].sign} ${realPlanets[0].degree}` : "Unknown";
->>>>>>> 60e34bc1a906c328ecff2bcedfa1808f3b2c501b
+      // ...existing code...
       
       if (!chartData || !chartData.planets || !Array.isArray(chartData.planets)) {
         console.error("Failed to calculate planetary positions for GPT request");
@@ -223,95 +176,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         birthDate,
         birthTime,
         birthPlace,
-<<<<<<< HEAD
-        latitude: latitude || chartData.latitude,
-        longitude: longitude || chartData.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
         generated: new Date().toISOString(),
-        chartType: "KP Raasi Chart",
-        planets: chartData.planets,
-        houses: chartData.houses,
-        kpSystem: chartData.kpSystem,
-        message: "Chart generated and saved via GPT integration using authentic Swiss Ephemeris calculations"
+        planets: planetsFormatted,
+        ayanamsa: `KP-Newcomb ${AYANAMSA_VALUE.toFixed(6)}°`,
+        calculation_method: "Authentic VSOP87 + KP-Newcomb Ayanamsa",
+        lagna: lagna,
+        rasi_chart: rasiChart,
+        kpSystem: {
+          ayanamsa: AYANAMSA_VALUE,
+          calculation_type: "Krishnamurti Paddhati with authentic astronomical positions",
+          features: ["Star Lord", "Sub Lord", "Sub-Sub Lord", "Nakshatra Pada"]
+        }
       };
-
-      // Save to database using admin user
-      const userId = 'admin-001';
-      try {
-        // Ensure user exists
-        await storage.upsertUser({
-          id: userId,
-          email: 'admin@localhost.com',
-          firstName: 'GPT',
-          lastName: 'Integration'
-        });
-      } catch (error) {
-        console.log("User already exists:", error);
-      }
-      
-      // Save birth data
-      const birthDataToSave = {
-        userId,
-        name: chart.name,
-        birthDate: chart.birthDate,
-        birthTime: chart.birthTime,
-        birthPlace: chart.birthPlace,
-        latitude: String(parseFloat(chart.latitude) || 0),
-        longitude: String(parseFloat(chart.longitude) || 0),
-        timezone: 'UTC',
-        year: new Date(chart.birthDate).getFullYear(),
-        month: new Date(chart.birthDate).getMonth() + 1,
-        day: new Date(chart.birthDate).getDate()
-      };
-      
-      const savedBirthData = await storage.createBirthData(birthDataToSave);
-      
-      // Save chart data
-      const chartDataToSave = {
-        userId,
-        birthDataId: savedBirthData.id,
-        chartType: chart.chartType,
-        chartData: JSON.stringify(chart),
-        kpData: JSON.stringify({
-          planets: chart.planets,
-          houses: chart.houses,
-          kpSystem: chart.kpSystem
-        })
-      };
-      
-      const savedChart = await storage.createChart(chartDataToSave);
-
-      console.log(`GPT Integration - Chart generated and saved successfully for ${name}`);
-      
-      return res.json({ 
-        success: true,
-        message: `Astrology chart for ${name} has been generated using authentic Swiss Ephemeris calculations and saved to the database`,
-        chartId: savedChart.id,
-        birthDataId: savedBirthData.id,
-        planetsCalculated: chart.planets.length,
-        calculation: "KP-Newcomb Ayanamsa with Swiss Ephemeris",
-        significators: "RAL, STL, SBL, SSL, SSSL included"
-      });
-      
-    } catch (error: any) {
-      console.error("GPT Integration Error:", error);
-      res.setHeader('Content-Type', 'application/json');
-      return res.status(500).json({ 
-        success: false,
-        error: "Failed to process birth data", 
-        details: error.message 
-      });
-    }
-  });
-
-  // GPT endpoint to query saved charts and birth data (requires API key)
-  app.get('/api/gpt/get-chart-data', gptApiKeyAuth, async (req, res) => {
-    try {
-      res.setHeader('Content-Type', 'application/json');
-      const { name, id } = req.query;
-      
-      console.log(`GPT Query - Searching for chart data: name=${name}, id=${id}`);
-      
-      // Get all saved charts
       const allCharts = await storage.getChartsByUserId ? await storage.getChartsByUserId('admin-001') : [];
       
       let foundChart = null;
@@ -698,8 +576,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Horoscope generated successfully using Swiss Ephemeris with authentic KP calculations and significators"
       };
 
-      console.log('Generated chart with accurate Swiss Ephemeris data');
-=======
         latitude: location.latitude,
         longitude: location.longitude,
         generated: new Date().toISOString(),
@@ -716,7 +592,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log('✅ Generated authentic KP chart with planets:', planetsFormatted.map(p => `${p.planet}: ${p.degree} ${p.sign}`));
->>>>>>> 60e34bc1a906c328ecff2bcedfa1808f3b2c501b
       return res.json(chart);
       
     } catch (error: any) {
