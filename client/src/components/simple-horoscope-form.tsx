@@ -140,7 +140,6 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
 
   const generateHoroscopeMutation = useMutation({
     mutationFn: async (data: HoroscopeFormData) => {
-<<<<<<< HEAD
       // Call the accurate Swiss Ephemeris API endpoint
       const response = await fetch("/api/horoscope", {
         method: "POST",
@@ -185,34 +184,6 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
         
         message: "Horoscope generated successfully using Swiss Ephemeris with KP astrological calculations"
       };
-=======
-      console.log("🚀 Calling REAL KP backend API with your birth data:", data);
-      
-      // Call backend API for AUTHENTIC KP calculations - NO MOCK DATA!
-      const response = await apiRequest("/api/horoscopes/simple", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          birthDate: data.birthDate,
-          birthTime: data.birthTime,
-          birthPlace: data.birthPlace,
-          latitude: data.latitude || "0",
-          longitude: data.longitude || "0"
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to generate REAL KP horoscope: ${errorText}`);
-      }
-
-      const chart = await response.json();
-      console.log("✅ Received AUTHENTIC KP chart from backend:", chart);
-      console.log("🌟 Real planetary positions:", chart.planets);
->>>>>>> 60e34bc1a906c328ecff2bcedfa1808f3b2c501b
       
       return chart;
     },
