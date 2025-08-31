@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KP Planetary Calculation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            margin: -30px -30px 30px -30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .birth-details {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .planetary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .planetary-table th {
+            background: #34495e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #2c3e50;
+        }
+        .planetary-table td {
+            padding: 10px 12px;
+            border: 1px solid #bdc3c7;
+            font-weight: bold;
+        }
+        .planet-name {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .sign-name {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        .degree-value {
+            color: #27ae60;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        .house-number {
+            color: #8e44ad;
+            font-weight: bold;
+        }
+        .ayanamsa-box {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .calculation-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KP PLANETARY CALCULATION TEST</h1>
+            <h2>EXACT KP-NEWCOMB AYANAMSA</h2>
+        </div>
+
+        <div class="birth-details">
+            <h3>BIRTH DETAILS:</h3>
+            <p><strong>Date:</strong> November 25, 1990 (Sunday)</p>
+            <p><strong>Time:</strong> 3:17 AM (Local Standard Time)</p>
+            <p><strong>Place:</strong> Pudukkottai, Tamil Nadu, India</p>
+            <p><strong>Coordinates:</strong> 13.0827°N, 80.2707°E</p>
+            <p><strong>Time Zone:</strong> UTC +05:30 (IST)</p>
+        </div>
+
+        <div class="ayanamsa-box">
+            <h3 style="color: #27ae60; margin: 0;">KP-NEWCOMB AYANAMSA</h3>
+            <h2 style="color: #27ae60; margin: 5px 0;">23° 43' 04"</h2>
+            <p style="margin: 0;">Decimal: 23.717777777777776°</p>
+        </div>
+
+        <table class="planetary-table">
+            <thead>
+                <tr>
+                    <th>PLANET</th>
+                    <th>TROPICAL LONGITUDE</th>
+                    <th>SIDEREAL LONGITUDE</th>
+                    <th>SIGN</th>
+                    <th>DEGREE</th>
+                    <th>HOUSE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="planet-name">SUN</td>
+                    <td>242.60°</td>
+                    <td>218.88°</td>
+                    <td class="sign-name">SCORPIO</td>
+                    <td class="degree-value">8° 52' 40"</td>
+                    <td class="house-number">8</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">MOON</td>
+                    <td>327.76°</td>
+                    <td>304.04°</td>
+                    <td class="sign-name">AQUARIUS</td>
+                    <td class="degree-value">4° 02' 26"</td>
+                    <td class="house-number">11</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">MARS</td>
+                    <td>66.36°</td>
+                    <td>42.64°</td>
+                    <td class="sign-name">TAURUS</td>
+                    <td class="degree-value">12° 38' 43"</td>
+                    <td class="house-number">2</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">MERCURY</td>
+                    <td>260.82°</td>
+                    <td>237.10°</td>
+                    <td class="sign-name">SCORPIO</td>
+                    <td class="degree-value">27° 06' 01"</td>
+                    <td class="house-number">8</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">JUPITER</td>
+                    <td>133.55°</td>
+                    <td>109.83°</td>
+                    <td class="sign-name">CANCER</td>
+                    <td class="degree-value">19° 50' 02"</td>
+                    <td class="house-number">4</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">VENUS</td>
+                    <td>248.45°</td>
+                    <td>224.73°</td>
+                    <td class="sign-name">SCORPIO</td>
+                    <td class="degree-value">14° 43' 46"</td>
+                    <td class="house-number">8</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">SATURN</td>
+                    <td>291.78°</td>
+                    <td>268.06°</td>
+                    <td class="sign-name">SAGITTARIUS</td>
+                    <td class="degree-value">28° 03' 36"</td>
+                    <td class="house-number">9</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="calculation-note">
+            <h4>CALCULATION METHOD:</h4>
+            <p>1. <strong>Tropical Positions:</strong> Calculated using astronomy-engine library with real astronomical data</p>
+            <p>2. <strong>KP-Newcomb Ayanamsa:</strong> Exact value 23° 43' 04" (23.717777777777776°)</p>
+            <p>3. <strong>Sidereal Conversion:</strong> Sidereal = Tropical - Ayanamsa</p>
+            <p>4. <strong>Sign Assignment:</strong> Based on sidereal longitude divided by 30°</p>
+            <p>5. <strong>House Assignment:</strong> Sign position (Aries=1, Taurus=2, ... Pisces=12)</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #2c3e50; color: white; border-radius: 5px;">
+            <h3>READY FOR COMPARISON</h3>
+            <p>These are the exact planetary positions using KP-Newcomb ayanamsa</p>
+            <p><strong>Please generate your chart with the same birth details and compare</strong></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,483 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "KP Astrology Engine API",
+    "version": "1.0.0",
+    "description": "API for processing birth data and generating astrology charts"
+  },
+  "servers": [
+    {
+      "url": "https://your-app-domain.replit.app"
+    }
+  ],
+  "paths": {
+    "/api/gpt/process-birth-data": {
+      "post": {
+        "summary": "Process birth data and generate astrology chart",
+        "operationId": "processBirthData",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Full name of the person"
+                  },
+                  "birthDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Birth date in YYYY-MM-DD format"
+                  },
+                  "birthTime": {
+                    "type": "string",
+                    "description": "Birth time in HH:MM:SS format (24-hour)"
+                  },
+                  "birthPlace": {
+                    "type": "string",
+                    "description": "Full birth location (city, state, country)"
+                  },
+                  "latitude": {
+                    "type": "string",
+                    "description": "Latitude in decimal degrees (optional)"
+                  },
+                  "longitude": {
+                    "type": "string",
+                    "description": "Longitude in decimal degrees (optional)"
+                  },
+                  "generateChart": {
+                    "type": "boolean",
+                    "description": "Whether to generate the chart (default: true)"
+                  }
+                },
+                "required": ["name", "birthDate", "birthTime", "birthPlace"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Birth data processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "birthDataId": {
+                          "type": "integer"
+                        },
+                        "personalInfo": {
+                          "type": "object"
+                        },
+                        "location": {
+                          "type": "object"
+                        },
+                        "chart": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized - invalid API key"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/gpt/pull-charts": {
+      "get": {
+        "summary": "Get all stored birth charts with filtering and pagination",
+        "operationId": "pullCharts",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of charts to return (max 50)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of charts to skip for pagination"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by person's name (partial match)"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by birth year"
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by birth month (1-12)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Birth charts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user_id": {
+                            "type": "string"
+                          },
+                          "birth_details": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "dob": {
+                                "type": "string"
+                              },
+                              "time": {
+                                "type": "string"
+                              },
+                              "place": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "astrological_values": {
+                            "type": "object",
+                            "properties": {
+                              "lagna": {
+                                "type": "string"
+                              },
+                              "star": {
+                                "type": "string"
+                              },
+                              "tithi": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "offset": {
+                          "type": "integer"
+                        },
+                        "has_more": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/search-charts": {
+      "get": {
+        "summary": "Search charts by astrological criteria",
+        "operationId": "searchCharts",
+        "parameters": [
+          {
+            "name": "lagna",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by lagna/ascendant sign"
+          },
+          {
+            "name": "star",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by nakshatra/star"
+          },
+          {
+            "name": "tithi",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by tithi"
+          },
+          {
+            "name": "year_from",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Start year for year range filter"
+          },
+          {
+            "name": "year_to",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "End year for year range filter"
+          },
+          {
+            "name": "place",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by birth place (partial match)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of results to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Number of results to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chart search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "search_criteria": {
+                      "type": "object"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user_id": {
+                            "type": "string"
+                          },
+                          "birth_details": {
+                            "type": "object"
+                          },
+                          "astrological_values": {
+                            "type": "object"
+                          },
+                          "match_score": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/available-years": {
+      "get": {
+        "summary": "Get available years for filtering",
+        "operationId": "getAvailableYears",
+        "responses": {
+          "200": {
+            "description": "Available years retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "available_years": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "total_years": {
+                          "type": "integer"
+                        },
+                        "year_range": {
+                          "type": "object",
+                          "properties": {
+                            "earliest": {
+                              "type": "integer"
+                            },
+                            "latest": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/gpt/delete-chart/{id}": {
+      "delete": {
+        "summary": "Delete a birth chart by ID",
+        "operationId": "deleteChart",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the chart to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chart deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "chartId": {
+                      "type": "integer"
+                    },
+                    "deletedChart": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "chartType": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid chart ID"
+          },
+          "401": {
+            "description": "Unauthorized - invalid API key"
+          },
+          "404": {
+            "description": "Chart not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ]
+}

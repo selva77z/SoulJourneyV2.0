@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KP Astrology Demo - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 20px;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ffd700;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+        }
+        .form-group input::placeholder {
+            color: #ccc;
+        }
+        .login-btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+        .demo-credentials {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #ffd700;
+        }
+        .demo-credentials h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .credentials {
+            text-align: left;
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success-message {
+            display: none;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <h1>🌟 KP Astrology Portal</h1>
+            <p>Discover Your Cosmic Connection</p>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">✨ Login to Portal ✨</button>
+        </form>
+        
+        <div class="demo-credentials">
+            <h3>🔑 Demo Admin Credentials</h3>
+            <p>Use these credentials to access the system:</p>
+            <div class="credentials">
+                📧 Email: admin@localhost.com<br>
+                🔐 Password: admin123<br>
+                🆔 User ID: admin-001
+            </div>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <h3>✅ Login Successful!</h3>
+            <p>Welcome to the KP Astrology Portal, Admin!</p>
+            <p>Redirecting to dashboard...</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Check demo credentials
+            if (email === 'admin@localhost.com' && password === 'admin123') {
+                document.querySelector('.login-form').style.display = 'none';
+                document.querySelector('.demo-credentials').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Simulate redirect after 2 seconds
+                setTimeout(() => {
+                    // In a real app, this would redirect to the dashboard
+                    alert('🎉 Demo Login Successful!\\n\\nIn the full application, you would now be redirected to:\\n- Birth Chart Generator\\n- KP Calculations\\n- Astrology Dashboard\\n- User Management');
+                    location.reload();
+                }, 2000);
+            } else {
+                alert('❌ Invalid credentials!\\n\\nPlease use the demo credentials provided below the form.');
+            }
+        });
+        
+        // Auto-fill demo credentials on page load
+        document.getElementById('email').value = 'admin@localhost.com';
+        document.getElementById('password').value = 'admin123';
+    </script>
+</body>
+</html>

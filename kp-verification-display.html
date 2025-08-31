@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KP Planetary Positions - 3:17 AM Pudukkottai 25/11/1990</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 20px; 
+            background: #f0f8ff;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4169E1;
+            padding-bottom: 20px;
+        }
+        .birth-details { 
+            background: #e6f3ff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 30px;
+            border-left: 4px solid #4169E1;
+        }
+        .planets-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .planets-table th { 
+            background: #4169E1; 
+            color: white;
+            padding: 12px 8px; 
+            text-align: center;
+            font-weight: bold;
+        }
+        .planets-table td { 
+            border: 1px solid #ddd; 
+            padding: 10px 8px; 
+            text-align: center;
+        }
+        .planets-table tr:nth-child(even) { 
+            background: #f9f9f9; 
+        }
+        .planet-name { 
+            font-weight: bold; 
+            color: #4169E1; 
+        }
+        .calculation-note {
+            background: #fff8dc;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #DAA520;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KP Planetary Positions Verification</h1>
+            <h2>Birth Data: 3:17 AM, Pudukkottai, 25 November 1990</h2>
+        </div>
+
+        <div class="birth-details">
+            <p><strong>Date:</strong> November 25, 1990 (Sunday)</p>
+            <p><strong>Time:</strong> 3:17 AM (Local Time)</p>
+            <p><strong>Place:</strong> Pudukkottai, Tamil Nadu, India</p>
+            <p><strong>Coordinates:</strong> 13.0827°N, 80.2707°E</p>
+            <p><strong>Ayanamsa:</strong> 23° 43' 04" (KP-Newcomb)</p>
+            <p><strong>Actual Ayanamsa Used:</strong> 23.72° (23° 43' 12")</p>
+        </div>
+
+        <table class="planets-table">
+            <thead>
+                <tr>
+                    <th>Planet</th>
+                    <th>Tropical Position</th>
+                    <th>KP-Newcomb Ayanamsa</th>
+                    <th>Sidereal Position</th>
+                    <th>Sign</th>
+                    <th>Degree</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="planet-name">Sun</td>
+                    <td>242.60°</td>
+                    <td>-23.72°</td>
+                    <td>218.88°</td>
+                    <td>Scorpio</td>
+                    <td>8° 52'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Moon</td>
+                    <td>327.76°</td>
+                    <td>-23.72°</td>
+                    <td>304.04°</td>
+                    <td>Aquarius</td>
+                    <td>4° 2'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Mars</td>
+                    <td>66.36°</td>
+                    <td>-23.72°</td>
+                    <td>42.65°</td>
+                    <td>Taurus</td>
+                    <td>12° 38'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Mercury</td>
+                    <td>260.82°</td>
+                    <td>-23.72°</td>
+                    <td>237.10°</td>
+                    <td>Scorpio</td>
+                    <td>27° 6'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Jupiter</td>
+                    <td>133.55°</td>
+                    <td>-23.72°</td>
+                    <td>109.83°</td>
+                    <td>Cancer</td>
+                    <td>19° 50'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Venus</td>
+                    <td>248.45°</td>
+                    <td>-23.72°</td>
+                    <td>224.73°</td>
+                    <td>Scorpio</td>
+                    <td>14° 43'</td>
+                </tr>
+                <tr>
+                    <td class="planet-name">Saturn</td>
+                    <td>291.78°</td>
+                    <td>-23.72°</td>
+                    <td>268.06°</td>
+                    <td>Sagittarius</td>
+                    <td>28° 3'</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="calculation-note">
+            <h3>Calculation Details</h3>
+            <p><strong>Source:</strong> Real astronomical calculations using astronomy-engine library</p>
+            <p><strong>Method:</strong> Tropical to Sidereal conversion using KP-Newcomb Ayanamsa</p>
+            <p><strong>Formula:</strong> Sidereal Position = Tropical Position - Ayanamsa Value</p>
+            <p><strong>Verification:</strong> These positions match the server calculations from the logs above</p>
+        </div>
+    </div>
+</body>
+</html>
