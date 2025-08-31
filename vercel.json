@@ -1,1 +1,39 @@
-{"version":2,"routes":[{"src":"/api/test","dest":"/api/test.js"},{"src":"/api/(.*)","dest":"/api/$1"},{"src":"/(.*)","dest":"/index.html"}]}
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/test",
+      "dest": "/api/test.js"
+    },
+    {
+      "src": "/api/horoscopes/simple",
+      "dest": "/api/horoscopes/simple.js"
+    },
+    {
+      "src": "/api/transits/current",
+      "dest": "/api/transits/current.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
