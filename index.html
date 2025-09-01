@@ -341,6 +341,12 @@
                 if (data.success) {
                     currentChart = data.chart;
                     displayProfessionalChart(data.chart);
+                    
+                    // Also calculate Dasha system
+                    const moonPlanet = data.chart.planets.find(p => p.planet === 'Moon');
+                    if (moonPlanet) {
+                        calculateDashaSystem(moonPlanet.longitude, data.chart.birthDate);
+                    }
                 } else {
                     chartResults.innerHTML = `
                         <div class="glass rounded-xl p-8 text-center">
@@ -566,6 +572,117 @@
                     </div>
                 `;
             }
+        }
+
+        async function calculateDashaSystem(moonLongitude, birthDate) {
+            try {
+                const response = await fetch('/api/dasha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        moonLongitude: moonLongitude,
+                        birthDate: birthDate
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayDashaSystem(data.dasha_system);
+                }
+            } catch (error) {
+                console.error('Error calculating Dasha:', error);
+            }
+        }
+
+        function displayDashaSystem(dashaSystem) {
+            const dashaResults = document.getElementById('dasha-results');
+            
+            let html = `
+                <div class="mb-8 text-center">
+                    <div class="glass rounded-lg p-6 inline-block">
+                        <h4 class="text-xl font-bold text-yellow-300 mb-2">Birth Dasha Lord</h4>
+                        <div class="text-3xl font-bold text-orange-400">${dashaSystem.birth_dasha_lord}</div>
+                        <div class="text-sm text-gray-400">Moon in Nakshatra ${dashaSystem.moon_nakshatra}</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            `;
+            
+            dashaSystem.dasha_periods.forEach((dasha, index) => {
+                const statusColors = {
+                    'current': 'border-green-400 bg-green-900/20',
+                    'past': 'border-gray-500 bg-gray-900/20',
+                    'future': 'border-blue-400 bg-blue-900/20'
+                };
+                
+                const statusIcons = {
+                    'current': 'fas fa-play text-green-400',
+                    'past': 'fas fa-check text-gray-400',
+                    'future': 'fas fa-clock text-blue-400'
+                };
+                
+                html += `
+                    <div class="glass rounded-lg p-6 border-2 ${statusColors[dasha.status] || statusColors['future']}">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="${statusIcons[dasha.status] || statusIcons['future']} text-xl mr-3"></i>
+                                <h4 class="text-xl font-bold text-yellow-300">${dasha.planet} Dasha</h4>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                ${dasha.is_birth_dasha ? 'Birth Dasha' : `Period ${index + 1}`}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Start Date:</span>
+                                <span class="text-blue-300">${dasha.start_date}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">End Date:</span>
+                                <span class="text-blue-300">${dasha.end_date}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Duration:</span>
+                                <span class="text-green-300">${dasha.duration_years} years</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Status:</span>
+                                <span class="text-purple-300 capitalize">${dasha.status}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-800/50 rounded-lg">
+                            <div class="text-sm text-gray-300">
+                                <strong class="text-yellow-300">Effects:</strong> ${getDashaEffects(dasha.planet)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            dashaResults.innerHTML = html;
+        }
+
+        function getDashaEffects(planet) {
+            const effects = {
+                'Sun': 'Leadership, authority, government connections, health issues related to heart/eyes, father\'s influence',
+                'Moon': 'Emotional changes, travel, public recognition, mother\'s influence, mental peace or disturbance',
+                'Mercury': 'Education, communication, business, writing, short travels, intellectual pursuits',
+                'Venus': 'Marriage, relationships, luxury, arts, beauty, vehicles, material comforts',
+                'Mars': 'Energy, conflicts, property matters, surgery, accidents, brother\'s influence',
+                'Jupiter': 'Wisdom, spirituality, teaching, children, guru\'s blessings, financial gains',
+                'Saturn': 'Hard work, delays, obstacles, chronic health issues, servants, foreign connections',
+                'Rahu': 'Sudden changes, foreign influences, unconventional paths, material desires, confusion',
+                'Ketu': 'Spirituality, detachment, research, past karma results, health problems'
+            };
+            
+            return effects[planet] || 'General planetary influence period';
         }
 
         // Initialize with default values for Pudukkottai birth data
