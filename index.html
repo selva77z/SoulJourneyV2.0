@@ -480,30 +480,68 @@
                     </div>
                 </div>
 
-                <!-- Quick Analysis -->
+                <!-- Detailed KP Analysis -->
                 <div class="glass rounded-xl p-8">
                     <h3 class="text-2xl font-bold mb-6 text-center text-yellow-300">
-                        <i class="fas fa-eye mr-3"></i>Quick KP Analysis
+                        <i class="fas fa-eye mr-3"></i>Complete KP Analysis
                     </h3>
+                    
+                    <!-- Core Planets -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="glass rounded-lg p-6 text-center border border-yellow-400/30">
+                            <i class="fas fa-sun text-yellow-400 text-3xl mb-3"></i>
+                            <h4 class="text-lg font-bold mb-2 text-yellow-300">Soul (Sun)</h4>
+                            <div class="text-orange-300 font-semibold text-lg">${chart.planets.find(p => p.planet === 'Sun')?.sign}</div>
+                            <div class="text-sm text-gray-300 mt-1">${chart.planets.find(p => p.planet === 'Sun')?.degree}</div>
+                            <div class="text-sm text-gray-400 mt-2">House ${chart.planets.find(p => p.planet === 'Sun')?.house}</div>
+                            <div class="text-xs text-purple-300 mt-1">Star: ${chart.planets.find(p => p.planet === 'Sun')?.star_lord}</div>
+                            <div class="text-xs text-pink-300">Sub: ${chart.planets.find(p => p.planet === 'Sun')?.sub_lord}</div>
+                        </div>
+                        
+                        <div class="glass rounded-lg p-6 text-center border border-blue-400/30">
+                            <i class="fas fa-moon text-blue-300 text-3xl mb-3"></i>
+                            <h4 class="text-lg font-bold mb-2 text-blue-300">Mind (Moon)</h4>
+                            <div class="text-blue-300 font-semibold text-lg">${chart.planets.find(p => p.planet === 'Moon')?.sign}</div>
+                            <div class="text-sm text-gray-300 mt-1">${chart.planets.find(p => p.planet === 'Moon')?.degree}</div>
+                            <div class="text-sm text-gray-400 mt-2">House ${chart.planets.find(p => p.planet === 'Moon')?.house}</div>
+                            <div class="text-xs text-purple-300 mt-1">Star: ${chart.planets.find(p => p.planet === 'Moon')?.star_lord}</div>
+                            <div class="text-xs text-pink-300">Sub: ${chart.planets.find(p => p.planet === 'Moon')?.sub_lord}</div>
+                        </div>
+                        
+                        <div class="glass rounded-lg p-6 text-center border border-green-400/30">
+                            <i class="fas fa-bolt text-green-400 text-3xl mb-3"></i>
+                            <h4 class="text-lg font-bold mb-2 text-green-300">Communication</h4>
+                            <div class="text-green-300 font-semibold text-lg">${chart.planets.find(p => p.planet === 'Mercury')?.sign}</div>
+                            <div class="text-sm text-gray-300 mt-1">${chart.planets.find(p => p.planet === 'Mercury')?.degree}</div>
+                            <div class="text-sm text-gray-400 mt-2">House ${chart.planets.find(p => p.planet === 'Mercury')?.house}</div>
+                            <div class="text-xs text-purple-300 mt-1">Star: ${chart.planets.find(p => p.planet === 'Mercury')?.star_lord}</div>
+                            <div class="text-xs text-pink-300">Sub: ${chart.planets.find(p => p.planet === 'Mercury')?.sub_lord}</div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="glass rounded-lg p-6">
-                            <h4 class="text-lg font-bold mb-4 text-green-300">
-                                <i class="fas fa-sun mr-2"></i>Luminaries
+                            <h4 class="text-lg font-bold mb-4 text-purple-300">
+                                <i class="fas fa-cog mr-2"></i>Calculation Details
                             </h4>
                             <div class="space-y-2 text-sm">
-                                <div><strong>Sun:</strong> ${chart.planets.find(p => p.planet === 'Sun')?.sign} - Core personality</div>
-                                <div><strong>Moon:</strong> ${chart.planets.find(p => p.planet === 'Moon')?.sign} - Emotional nature</div>
-                                <div><strong>Ascendant:</strong> ${chart.planets.find(p => p.planet === 'Sun')?.sign} - Life approach</div>
+                                <div><strong>Method:</strong> ${chart.calculation_method}</div>
+                                <div><strong>Ayanamsa:</strong> ${chart.ayanamsa}</div>
+                                <div><strong>Chart Type:</strong> ${chart.chartType}</div>
+                                <div><strong>Generated:</strong> ${new Date(chart.generated).toLocaleString()}</div>
                             </div>
                         </div>
+                        
                         <div class="glass rounded-lg p-6">
-                            <h4 class="text-lg font-bold mb-4 text-purple-300">
-                                <i class="fas fa-magic mr-2"></i>KP Specialties
+                            <h4 class="text-lg font-bold mb-4 text-cyan-300">
+                                <i class="fas fa-info-circle mr-2"></i>Chart Summary
                             </h4>
                             <div class="space-y-2 text-sm">
-                                <div><strong>Calculation Method:</strong> ${chart.calculation_method}</div>
-                                <div><strong>Ayanamsa Applied:</strong> ${chart.ayanamsa}</div>
-                                <div><strong>Chart Type:</strong> ${chart.chartType}</div>
+                                <div><strong>Total Planets:</strong> ${chart.planets.length}</div>
+                                <div><strong>Houses Occupied:</strong> ${[...new Set(chart.planets.map(p => p.house))].length}</div>
+                                <div><strong>Signs Occupied:</strong> ${[...new Set(chart.planets.map(p => p.sign))].length}</div>
+                                <div><strong>Nakshatras:</strong> ${[...new Set(chart.planets.map(p => p.nakshatra))].length}</div>
                             </div>
                         </div>
                     </div>
