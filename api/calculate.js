@@ -22,9 +22,25 @@ export default async function handler(req, res) {
     
     console.log('📊 Calculating horoscope for:', { birthDate, birthTime, placeName });
     
-    // Parse the birth data
-    const [day, month, year] = birthDate.split('/').map(Number);
-    const [time, period] = birthTime.split(' ');
+    // Parse the birth data - handle both DD/MM/YYYY and YYYY-MM-DD formats
+    let day, month, year;
+    if (birthDate.includes('/')) {
+      [day, month, year] = birthDate.split('/').map(Number);
+    } else if (birthDate.includes('-')) {
+      [year, month, day] = birthDate.split('-').map(Number);
+    } else {
+      throw new Error('Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD');
+    }
+    
+    // Parse time - handle both "HH:MM" and "HH:MM AM/PM" formats
+    let time, period;
+    if (birthTime.includes(' ')) {
+      [time, period] = birthTime.split(' ');
+    } else {
+      time = birthTime;
+      period = null;
+    }
+    
     const [hours, minutes] = time.split(':').map(Number);
     
     // Convert to 24-hour format
