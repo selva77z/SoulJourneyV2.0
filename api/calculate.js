@@ -20,6 +20,14 @@ export default async function handler(req, res) {
   try {
     const { birthDate, birthTime, latitude, longitude, placeName } = req.body;
     
+    // Validate required fields
+    if (!birthDate || !birthTime || !placeName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: birthDate, birthTime, placeName'
+      });
+    }
+    
     console.log('📊 Calculating horoscope for:', { birthDate, birthTime, placeName });
     
     // Parse the birth data - handle both DD/MM/YYYY and YYYY-MM-DD formats
