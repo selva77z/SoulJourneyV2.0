@@ -1,1 +1,226 @@
-<!DOCTYPE html><html><head><title>SoulJourney V2.0</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-900 text-white p-8"><h1 class="text-4xl text-center mb-8">🌟 SoulJourney V2.0 - KP Astrology System</h1><p class="text-center text-xl">With Backend API Support</p><div class="max-w-2xl mx-auto mt-8 bg-gray-800 p-6 rounded"><h2 class="text-2xl mb-4">Generate Horoscope</h2><form id="form" class="space-y-4"><input type="text" placeholder="Name" id="name" class="w-full p-3 bg-gray-700 rounded"><input type="date" id="date" class="w-full p-3 bg-gray-700 rounded"><input type="time" id="time" class="w-full p-3 bg-gray-700 rounded"><input type="text" placeholder="Birth Place" id="place" class="w-full p-3 bg-gray-700 rounded"><button type="submit" class="w-full bg-blue-600 p-3 rounded">Generate Chart</button></form><div id="result" class="mt-6 hidden"></div></div><script>document.getElementById("form").onsubmit=async function(e){e.preventDefault();const name=document.getElementById("name").value;const date=document.getElementById("date").value;const time=document.getElementById("time").value;const place=document.getElementById("place").value;document.getElementById("result").innerHTML="<div class=\"bg-gray-700 p-4 rounded\"><p class=\"text-yellow-400\">Calculating...</p></div>";document.getElementById("result").classList.remove("hidden");try{const response=await fetch("/api/calculate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({birthDate:date,birthTime:time,latitude:40.7128,longitude:-74.0060,placeName:place})});const data=await response.json();if(data.success){document.getElementById("result").innerHTML=`<div class="bg-gray-700 p-4 rounded"><h3 class="text-xl mb-2">Chart for ${name}</h3><p>Date: ${date}</p><p>Time: ${time}</p><p>Place: ${place}</p><p class="mt-4 text-green-400">${data.message}</p><div class="mt-4"><h4 class="text-lg mb-2">Planets:</h4>${data.chart.planets.map(p=>`<p class="text-sm">${p.planet}: ${p.degree} ${p.sign} (${p.nakshatra})</p>`).join("")}</div></div>`;}else{document.getElementById("result").innerHTML=`<div class="bg-gray-700 p-4 rounded"><p class="text-red-400">Error: ${data.error}</p></div>`;}}catch(error){document.getElementById("result").innerHTML=`<div class="bg-gray-700 p-4 rounded"><p class="text-red-400">Error: ${error.message}</p></div>`;}};</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 SoulJourney V2.0 - KP Astrology System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                🌟 SoulJourney V2.0 - KP Astrology System
+            </h1>
+            <p class="text-xl opacity-90">With Backend API Support & Multiple Ayanamsa Options</p>
+        </div>
+
+        <!-- Chart Generation Form -->
+        <div class="max-w-3xl mx-auto glass rounded-xl p-8">
+            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-300">📊 Generate Horoscope</h2>
+            
+            <form id="form" class="space-y-6">
+                <!-- Personal Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">👤 Full Name</label>
+                        <input type="text" placeholder="Enter full name" id="name" 
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">📍 Birth Place</label>
+                        <input type="text" placeholder="City, State, Country" id="place" 
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    </div>
+                </div>
+
+                <!-- Date and Time -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">📅 Birth Date</label>
+                        <input type="date" id="date" 
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">⏰ Birth Time</label>
+                        <input type="time" id="time" step="1"
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    </div>
+                </div>
+
+                <!-- Ayanamsa Selection -->
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
+                    <label class="block text-sm font-medium mb-3">🔮 Ayanamsa System</label>
+                    <select id="ayanamsa" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        <option value="kp-newcomb">KP-Newcomb (23° 43' 04") - Recommended for KP</option>
+                        <option value="lahiri">Lahiri (Chitrapaksha) - Most Popular</option>
+                        <option value="raman">B.V. Raman - Traditional</option>
+                        <option value="krishnamurti">Krishnamurti - Original KP</option>
+                        <option value="yukteshwar">Sri Yukteshwar - Yogananda System</option>
+                        <option value="djwhal-khul">Djwhal Khul - Esoteric</option>
+                        <option value="fagan-bradley">Fagan-Bradley - Western Sidereal</option>
+                        <option value="galactic-center">Galactic Center - Modern</option>
+                    </select>
+                    <div class="mt-2 text-sm text-gray-400">
+                        <span id="ayanamsa-info">KP-Newcomb is the authentic ayanamsa for Krishnamurti Paddhati astrology</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black px-6 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                    ✨ Generate KP Chart ✨
+                </button>
+            </form>
+
+            <!-- Results -->
+            <div id="result" class="mt-8 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Ayanamsa information
+        const ayanamsaInfo = {
+            'kp-newcomb': 'KP-Newcomb is the authentic ayanamsa for Krishnamurti Paddhati astrology (23° 43\' 04")',
+            'lahiri': 'Lahiri (Chitrapaksha) is the most widely used ayanamsa in Indian astrology (23° 51\' 10")',
+            'raman': 'B.V. Raman ayanamsa is traditional and conservative (22° 27\' 39")',
+            'krishnamurti': 'Original Krishnamurti ayanamsa as used by K.S. Krishnamurti (23° 42\' 51")',
+            'yukteshwar': 'Sri Yukteshwar ayanamsa used in Yogananda\'s system (22° 46\' 39")',
+            'djwhal-khul': 'Djwhal Khul ayanamsa for esoteric astrology (23° 06\' 45")',
+            'fagan-bradley': 'Fagan-Bradley for Western sidereal astrology (24° 44\' 12")',
+            'galactic-center': 'Galactic Center ayanamsa for modern cosmic astrology (26° 57\' 46")'
+        };
+
+        // Update ayanamsa info when selection changes
+        document.getElementById('ayanamsa').addEventListener('change', function() {
+            const selected = this.value;
+            document.getElementById('ayanamsa-info').textContent = ayanamsaInfo[selected];
+        });
+
+        // Form submission
+        document.getElementById("form").onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById("name").value;
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const place = document.getElementById("place").value;
+            const ayanamsa = document.getElementById("ayanamsa").value;
+            
+            if (!name || !date || !time || !place) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            document.getElementById("result").innerHTML = `
+                <div class="glass rounded-lg p-6">
+                    <div class="text-center text-yellow-400">
+                        🔄 Calculating KP Chart...<br>
+                        <small class="text-gray-300">Using ${ayanamsaInfo[ayanamsa]}</small>
+                    </div>
+                </div>
+            `;
+            document.getElementById("result").classList.remove("hidden");
+            
+            try {
+                const response = await fetch("/api/calculate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        birthDate: date,
+                        birthTime: time,
+                        latitude: 13.0827,  // Chennai coordinates
+                        longitude: 80.2707,
+                        placeName: place,
+                        ayanamsa: ayanamsa
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayChart(data.chart, name);
+                } else {
+                    document.getElementById("result").innerHTML = `
+                        <div class="glass rounded-lg p-4">
+                            <p class="text-red-400">❌ Error: ${data.error}</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                document.getElementById("result").innerHTML = `
+                    <div class="glass rounded-lg p-4">
+                        <p class="text-red-400">❌ Connection Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        };
+
+        function displayChart(chart, name) {
+            let html = `
+                <div class="glass rounded-xl p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-yellow-300">${name}'s KP Chart</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
+                        <div class="glass rounded-lg p-3">
+                            <strong class="text-blue-300">📅 Date:</strong><br>${chart.birthDate}
+                        </div>
+                        <div class="glass rounded-lg p-3">
+                            <strong class="text-green-300">⏰ Time:</strong><br>${chart.birthTime}
+                        </div>
+                        <div class="glass rounded-lg p-3">
+                            <strong class="text-purple-300">📍 Place:</strong><br>${chart.birthPlace}
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-6 glass rounded-lg p-4">
+                        <strong class="text-yellow-300">🔮 Ayanamsa:</strong> ${chart.ayanamsa}
+                    </div>
+
+                    <h4 class="text-xl font-bold mb-4 text-yellow-300">🪐 Planetary Positions</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            `;
+            
+            chart.planets.forEach(planet => {
+                html += `
+                    <div class="glass rounded-lg p-4 hover:bg-white/10 transition-all">
+                        <div class="font-bold text-lg text-yellow-300">${planet.planet}</div>
+                        <div class="text-orange-300 font-mono">${planet.degree}</div>
+                        <div class="text-blue-300 font-semibold">${planet.sign}</div>
+                        <div class="text-sm text-gray-300">House ${planet.house}</div>
+                        <div class="text-sm text-green-300">${planet.nakshatra}</div>
+                        <div class="text-xs text-purple-300">Star Lord: ${planet.star_lord}</div>
+                        <div class="text-xs text-pink-300">Sub Lord: ${planet.sub_lord}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    
+                    <div class="text-center text-sm text-gray-400 mt-4">
+                        <p>✨ ${chart.calculation_method}</p>
+                        <p>📊 Generated: ${new Date(chart.generated).toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById("result").innerHTML = html;
+        }
+    </script>
+</body>
+</html>

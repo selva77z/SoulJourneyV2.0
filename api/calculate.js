@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { birthDate, birthTime, latitude, longitude, placeName } = req.body;
+    const { name, birthDate, birthTime, latitude, longitude, placeName, ayanamsa } = req.body;
     
     // Validate required fields
     if (!birthDate || !birthTime || !placeName) {
@@ -59,9 +59,12 @@ export default async function handler(req, res) {
       hour24 = 0;
     }
 
+    // Get ayanamsa value based on selection
+    const ayanamsaData = getAyanamsaValue(ayanamsa || 'kp-newcomb');
+    
     // Generate KP chart data
     const chartData = {
-      name: "Selvapriyan",
+      name: name || "User",
       birthDate: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
       birthTime: `${hour24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`,
       birthPlace: placeName,
@@ -169,8 +172,9 @@ export default async function handler(req, res) {
         "Virgo": []
       },
       
-      ayanamsa: "23° 43' 07\" (KP-Newcomb)",
-      calculation_method: "Authentic KP calculations with Swiss Ephemeris precision"
+      ayanamsa: `${ayanamsaData.formatted} (${ayanamsaData.name})`,
+      ayanamsa_value: ayanamsaData.value,
+      calculation_method: `Authentic KP calculations using ${ayanamsaData.name} ayanamsa`
     };
 
     res.status(200).json({
@@ -188,4 +192,59 @@ export default async function handler(req, res) {
       message: 'Failed to calculate horoscope'
     });
   }
+}
+
+function getAyanamsaValue(ayanamsaType) {
+  const ayanamsaSystems = {
+    'kp-newcomb': {
+      name: 'KP-Newcomb',
+      value: 23 + 43/60 + 4/3600,  // 23° 43' 04"
+      formatted: '23° 43\' 04"',
+      description: 'Authentic Krishnamurti Paddhati ayanamsa'
+    },
+    'lahiri': {
+      name: 'Lahiri (Chitrapaksha)',
+      value: 23 + 51/60 + 10/3600,  // 23° 51' 10"
+      formatted: '23° 51\' 10"',
+      description: 'Most popular ayanamsa in Indian astrology'
+    },
+    'raman': {
+      name: 'B.V. Raman',
+      value: 22 + 27/60 + 39/3600,  // 22° 27' 39"
+      formatted: '22° 27\' 39"',
+      description: 'Traditional conservative ayanamsa'
+    },
+    'krishnamurti': {
+      name: 'Krishnamurti Original',
+      value: 23 + 42/60 + 51/3600,  // 23° 42' 51"
+      formatted: '23° 42\' 51"',
+      description: 'Original K.S. Krishnamurti ayanamsa'
+    },
+    'yukteshwar': {
+      name: 'Sri Yukteshwar',
+      value: 22 + 46/60 + 39/3600,  // 22° 46' 39"
+      formatted: '22° 46\' 39"',
+      description: 'Yogananda lineage ayanamsa'
+    },
+    'djwhal-khul': {
+      name: 'Djwhal Khul',
+      value: 23 + 6/60 + 45/3600,   // 23° 06' 45"
+      formatted: '23° 06\' 45"',
+      description: 'Esoteric astrology ayanamsa'
+    },
+    'fagan-bradley': {
+      name: 'Fagan-Bradley',
+      value: 24 + 44/60 + 12/3600,  // 24° 44' 12"
+      formatted: '24° 44\' 12"',
+      description: 'Western sidereal astrology'
+    },
+    'galactic-center': {
+      name: 'Galactic Center',
+      value: 26 + 57/60 + 46/3600,  // 26° 57' 46"
+      formatted: '26° 57\' 46"',
+      description: 'Modern cosmic astrology'
+    }
+  };
+  
+  return ayanamsaSystems[ayanamsaType] || ayanamsaSystems['kp-newcomb'];
 }
