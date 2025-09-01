@@ -1,20 +1,3 @@
 {
-  "version": 2,
-  "functions": {
-    "api/calculate.js": {
-      "runtime": "@vercel/node@2.15.10"
-    },
-    "api/test.js": {
-      "runtime": "@vercel/node@2.15.10"
-    },
-    "api/dasha.js": {
-      "runtime": "@vercel/node@2.15.10"
-    },
-    "api/transits/current.js": {
-      "runtime": "@vercel/node@2.15.10"
-    },
-    "api/gpt/process-birth-data.js": {
-      "runtime": "@vercel/node@2.15.10"
-    }
-  }
+  "version": 2
 }
