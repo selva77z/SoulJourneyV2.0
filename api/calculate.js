@@ -62,6 +62,9 @@ export default async function handler(req, res) {
     // Get ayanamsa value based on selection
     const ayanamsaData = getAyanamsaValue(ayanamsa || 'kp-newcomb');
     
+    // Calculate real planetary positions
+    const planetaryPositions = calculatePlanetaryPositions(year, month, day, hour24, minutes, 0, ayanamsaData.value);
+    
     // Generate KP chart data
     const chartData = {
       name: name || "User",
@@ -71,90 +74,8 @@ export default async function handler(req, res) {
       generated: new Date().toISOString(),
       chartType: "KP Astrology Chart",
       
-      // KP planetary positions for 25/11/1990, 03:17 AM, Chennai
-      planets: [
-        { 
-          planet: "Sun", 
-          degree: "8° 52' 27\"", 
-          sign: "Scorpio", 
-          nakshatra: "Anuradha",
-          house: 2,
-          star_lord: "Saturn",
-          sub_lord: "Venus"
-        },
-        { 
-          planet: "Moon", 
-          degree: "4° 2' 23\"", 
-          sign: "Aquarius", 
-          nakshatra: "Dhanishtha",
-          house: 5,
-          star_lord: "Mars", 
-          sub_lord: "Rahu"
-        },
-        { 
-          planet: "Mercury", 
-          degree: "13° 53' 18\"", 
-          sign: "Scorpio", 
-          nakshatra: "Anuradha",
-          house: 2,
-          star_lord: "Saturn",
-          sub_lord: "Mercury"
-        },
-        { 
-          planet: "Venus", 
-          degree: "22° 42' 22\"", 
-          sign: "Scorpio", 
-          nakshatra: "Jyeshtha",
-          house: 2,
-          star_lord: "Mercury",
-          sub_lord: "Ketu"
-        },
-        { 
-          planet: "Mars", 
-          degree: "10° 10' 26\"", 
-          sign: "Scorpio", 
-          nakshatra: "Anuradha",
-          house: 2,
-          star_lord: "Saturn",
-          sub_lord: "Sun"
-        },
-        { 
-          planet: "Jupiter", 
-          degree: "9° 37' 50\"", 
-          sign: "Cancer", 
-          nakshatra: "Pushya",
-          house: 10,
-          star_lord: "Saturn",
-          sub_lord: "Ketu"
-        },
-        { 
-          planet: "Saturn", 
-          degree: "2° 20' 37\"", 
-          sign: "Capricorn", 
-          nakshatra: "Uttara Ashadha",
-          house: 4,
-          star_lord: "Sun",
-          sub_lord: "Venus"
-        },
-        { 
-          planet: "Rahu", 
-          degree: "7° 21' 48\"", 
-          sign: "Capricorn", 
-          nakshatra: "Uttara Ashadha",
-          house: 4,
-          star_lord: "Sun",
-          sub_lord: "Moon"
-        },
-        { 
-          planet: "Ketu", 
-          degree: "7° 21' 48\"", 
-          sign: "Cancer", 
-          nakshatra: "Pushya",
-          house: 10,
-          star_lord: "Saturn",
-          sub_lord: "Moon"
-        }
-      ],
+      // Real calculated planetary positions
+      planets: planetaryPositions,
       
       // House information
       houses: {
