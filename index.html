@@ -3,102 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌟 SoulJourney V2.0 - KP Astrology System</title>
+    <title>🌟 SoulJourney - Professional KP Astrology</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
             min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .glass {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #ffd700, #ff8c00, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        .planet-card {
+            transition: all 0.3s ease;
+        }
+        .planet-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+        }
+        .chart-circle {
+            width: 300px;
+            height: 300px;
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+        }
+        .house-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body class="text-white">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                🌟 SoulJourney V2.0 - KP Astrology System
-            </h1>
-            <p class="text-xl opacity-90">With Backend API Support & Multiple Ayanamsa Options</p>
+    <!-- Navigation Header -->
+    <nav class="glass border-b border-white/20">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-star text-yellow-400 text-2xl"></i>
+                    <h1 class="text-2xl font-bold gradient-text">SoulJourney</h1>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#home" class="nav-link px-4 py-2 rounded-lg" onclick="showSection('home')">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="#chart" class="nav-link px-4 py-2 rounded-lg" onclick="showSection('chart')">
+                        <i class="fas fa-chart-pie mr-2"></i>Birth Chart
+                    </a>
+                    <a href="#dasha" class="nav-link px-4 py-2 rounded-lg" onclick="showSection('dasha')">
+                        <i class="fas fa-clock mr-2"></i>Dasha
+                    </a>
+                    <a href="#transits" class="nav-link px-4 py-2 rounded-lg" onclick="showSection('transits')">
+                        <i class="fas fa-globe mr-2"></i>Transits
+                    </a>
+                </div>
+            </div>
         </div>
+    </nav>
 
-        <!-- Chart Generation Form -->
-        <div class="max-w-3xl mx-auto glass rounded-xl p-8">
-            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-300">📊 Generate Horoscope</h2>
-            
-            <form id="form" class="space-y-6">
-                <!-- Personal Details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">👤 Full Name</label>
-                        <input type="text" placeholder="Enter full name" id="name" 
-                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+    <!-- Home Section -->
+    <div id="home-section" class="section">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Hero Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold mb-4 gradient-text">
+                    🌟 Professional KP Astrology
+                </h1>
+                <p class="text-xl mb-6 opacity-90">Authentic Krishnamurti Paddhati Calculations</p>
+                <div class="flex justify-center space-x-8 text-sm opacity-80">
+                    <div><i class="fas fa-check-circle text-green-400 mr-2"></i>Swiss Ephemeris Precision</div>
+                    <div><i class="fas fa-check-circle text-green-400 mr-2"></i>Multiple Ayanamsa Systems</div>
+                    <div><i class="fas fa-check-circle text-green-400 mr-2"></i>Complete KP Analysis</div>
+                </div>
+            </div>
+
+            <!-- Birth Data Form -->
+            <div class="max-w-4xl mx-auto glass rounded-xl p-8 mb-8">
+                <h2 class="text-3xl font-bold mb-8 text-center text-yellow-300">
+                    <i class="fas fa-user-circle mr-3"></i>Enter Birth Details
+                </h2>
+                
+                <form id="birth-form" class="space-y-6">
+                    <!-- Personal Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-user text-blue-400 mr-2"></i>Full Name *
+                            </label>
+                            <input type="text" placeholder="Enter full name" id="name" 
+                                   class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-venus-mars text-pink-400 mr-2"></i>Gender
+                            </label>
+                            <select id="gender" class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">📍 Birth Place</label>
-                        <input type="text" placeholder="City, State, Country" id="place" 
-                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+
+                    <!-- Birth Date and Time -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-calendar text-green-400 mr-2"></i>Birth Date *
+                            </label>
+                            <input type="date" id="date" value="1990-11-25"
+                                   class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-clock text-purple-400 mr-2"></i>Birth Time *
+                            </label>
+                            <input type="time" id="time" step="1" value="03:17:00"
+                                   class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-map-marker-alt text-red-400 mr-2"></i>Birth Place *
+                            </label>
+                            <input type="text" placeholder="City, State, Country" id="place" value="Pudukkottai, Tamil Nadu, India"
+                                   class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">
+                                <i class="fas fa-globe text-cyan-400 mr-2"></i>Time Zone
+                            </label>
+                            <select id="timezone" class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                                <option value="+05:30" selected>IST (+05:30) - India</option>
+                                <option value="+00:00">GMT (+00:00) - London</option>
+                                <option value="-05:00">EST (-05:00) - New York</option>
+                                <option value="+08:00">CST (+08:00) - China</option>
+                                <option value="+09:00">JST (+09:00) - Japan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ayanamsa Selection -->
+                    <div class="bg-gray-800/30 p-6 rounded-lg border border-gray-600">
+                        <label class="block text-lg font-medium mb-4">
+                            <i class="fas fa-compass text-yellow-400 mr-2"></i>Ayanamsa System
+                        </label>
+                        <select id="ayanamsa" class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                            <option value="kp-newcomb">KP-Newcomb (23° 43' 04") - Recommended for KP Astrology</option>
+                            <option value="lahiri">Lahiri (23° 51' 10") - Most Popular in India</option>
+                            <option value="raman">B.V. Raman (22° 27' 39") - Traditional Conservative</option>
+                            <option value="krishnamurti">Krishnamurti Original (23° 42' 51") - K.S. Krishnamurti</option>
+                            <option value="yukteshwar">Sri Yukteshwar (22° 46' 39") - Yogananda Lineage</option>
+                            <option value="djwhal-khul">Djwhal Khul (23° 06' 45") - Esoteric Astrology</option>
+                            <option value="fagan-bradley">Fagan-Bradley (24° 44' 12") - Western Sidereal</option>
+                            <option value="galactic-center">Galactic Center (26° 57' 46") - Modern Cosmic</option>
+                        </select>
+                        <div class="mt-3 p-3 bg-blue-900/30 rounded-lg">
+                            <div class="text-sm text-blue-200">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span id="ayanamsa-info">KP-Newcomb is the authentic ayanamsa for Krishnamurti Paddhati astrology</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="text-center">
+                        <button type="submit" class="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-black px-12 py-4 rounded-xl font-bold text-xl transition-all transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-magic mr-3"></i>Generate Complete KP Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div id="chart-section" class="section hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div id="chart-results"></div>
+        </div>
+    </div>
+
+    <!-- Dasha Section -->
+    <div id="dasha-section" class="section hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div class="glass rounded-xl p-8">
+                <h2 class="text-3xl font-bold mb-6 text-center gradient-text">
+                    <i class="fas fa-clock mr-3"></i>Vimshottari Dasha System
+                </h2>
+                <div id="dasha-results">
+                    <div class="text-center text-gray-400">
+                        <i class="fas fa-hourglass-half text-4xl mb-4"></i>
+                        <p>Generate a birth chart first to see Dasha periods</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Date and Time -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">📅 Birth Date</label>
-                        <input type="date" id="date" 
-                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">⏰ Birth Time</label>
-                        <input type="time" id="time" step="1"
-                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    </div>
+    <!-- Transits Section -->
+    <div id="transits-section" class="section hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div class="glass rounded-xl p-8">
+                <h2 class="text-3xl font-bold mb-6 text-center gradient-text">
+                    <i class="fas fa-globe mr-3"></i>Current Planetary Transits
+                </h2>
+                <div class="text-center mb-6">
+                    <button onclick="loadCurrentTransits()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition-all">
+                        <i class="fas fa-sync-alt mr-2"></i>Load Current Transits
+                    </button>
                 </div>
-
-                <!-- Ayanamsa Selection -->
-                <div class="bg-gray-800 p-4 rounded-lg border border-gray-600">
-                    <label class="block text-sm font-medium mb-3">🔮 Ayanamsa System</label>
-                    <select id="ayanamsa" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                        <option value="kp-newcomb">KP-Newcomb (23° 43' 04") - Recommended for KP</option>
-                        <option value="lahiri">Lahiri (Chitrapaksha) - Most Popular</option>
-                        <option value="raman">B.V. Raman - Traditional</option>
-                        <option value="krishnamurti">Krishnamurti - Original KP</option>
-                        <option value="yukteshwar">Sri Yukteshwar - Yogananda System</option>
-                        <option value="djwhal-khul">Djwhal Khul - Esoteric</option>
-                        <option value="fagan-bradley">Fagan-Bradley - Western Sidereal</option>
-                        <option value="galactic-center">Galactic Center - Modern</option>
-                    </select>
-                    <div class="mt-2 text-sm text-gray-400">
-                        <span id="ayanamsa-info">KP-Newcomb is the authentic ayanamsa for Krishnamurti Paddhati astrology</span>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black px-6 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105">
-                    ✨ Generate KP Chart ✨
-                </button>
-            </form>
-
-            <!-- Results -->
-            <div id="result" class="mt-8 hidden"></div>
+                <div id="transits-results"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        let currentChart = null;
+
         // Ayanamsa information
         const ayanamsaInfo = {
-            'kp-newcomb': 'KP-Newcomb is the authentic ayanamsa for Krishnamurti Paddhati astrology (23° 43\' 04")',
-            'lahiri': 'Lahiri (Chitrapaksha) is the most widely used ayanamsa in Indian astrology (23° 51\' 10")',
-            'raman': 'B.V. Raman ayanamsa is traditional and conservative (22° 27\' 39")',
-            'krishnamurti': 'Original Krishnamurti ayanamsa as used by K.S. Krishnamurti (23° 42\' 51")',
-            'yukteshwar': 'Sri Yukteshwar ayanamsa used in Yogananda\'s system (22° 46\' 39")',
-            'djwhal-khul': 'Djwhal Khul ayanamsa for esoteric astrology (23° 06\' 45")',
-            'fagan-bradley': 'Fagan-Bradley for Western sidereal astrology (24° 44\' 12")',
-            'galactic-center': 'Galactic Center ayanamsa for modern cosmic astrology (26° 57\' 46")'
+            'kp-newcomb': 'KP-Newcomb (23° 43\' 04") is the authentic ayanamsa for Krishnamurti Paddhati astrology, providing the most accurate KP calculations.',
+            'lahiri': 'Lahiri (23° 51\' 10") is the most widely used ayanamsa in Indian astrology, officially adopted by the Indian government.',
+            'raman': 'B.V. Raman (22° 27\' 39") is a traditional conservative ayanamsa used by classical astrologers.',
+            'krishnamurti': 'Krishnamurti Original (23° 42\' 51") is the original ayanamsa used by K.S. Krishnamurti himself.',
+            'yukteshwar': 'Sri Yukteshwar (22° 46\' 39") is used in the Yogananda lineage and Self-Realization Fellowship.',
+            'djwhal-khul': 'Djwhal Khul (23° 06\' 45") is used in esoteric astrology and Alice Bailey teachings.',
+            'fagan-bradley': 'Fagan-Bradley (24° 44\' 12") is the standard ayanamsa for Western sidereal astrology.',
+            'galactic-center': 'Galactic Center (26° 57\' 46") aligns 0° Sagittarius with the Galactic Center for cosmic astrology.'
         };
 
         // Update ayanamsa info when selection changes
@@ -107,8 +267,25 @@
             document.getElementById('ayanamsa-info').textContent = ayanamsaInfo[selected];
         });
 
+        // Section navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-white/20');
+            });
+            event.target.closest('.nav-link').classList.add('bg-white/20');
+        }
+
         // Form submission
-        document.getElementById("form").onsubmit = async function(e) {
+        document.getElementById("birth-form").onsubmit = async function(e) {
             e.preventDefault();
             
             const name = document.getElementById("name").value;
@@ -116,21 +293,29 @@
             const time = document.getElementById("time").value;
             const place = document.getElementById("place").value;
             const ayanamsa = document.getElementById("ayanamsa").value;
+            const gender = document.getElementById("gender").value;
+            const timezone = document.getElementById("timezone").value;
             
             if (!name || !date || !time || !place) {
-                alert('Please fill in all required fields');
+                alert('Please fill in all required fields (marked with *)');
                 return;
             }
             
-            document.getElementById("result").innerHTML = `
-                <div class="glass rounded-lg p-6">
-                    <div class="text-center text-yellow-400">
-                        🔄 Calculating KP Chart...<br>
-                        <small class="text-gray-300">Using ${ayanamsaInfo[ayanamsa]}</small>
+            // Show loading state
+            const chartResults = document.getElementById("chart-results");
+            chartResults.innerHTML = `
+                <div class="glass rounded-xl p-8 text-center">
+                    <div class="animate-spin text-6xl text-yellow-400 mb-4">
+                        <i class="fas fa-star"></i>
                     </div>
+                    <h3 class="text-2xl font-bold mb-4 text-yellow-300">Calculating Your KP Chart...</h3>
+                    <p class="text-gray-300 mb-2">Using ${ayanamsaInfo[ayanamsa].split(' (')[0]} Ayanamsa</p>
+                    <p class="text-sm text-gray-400">This may take a few moments for precise calculations</p>
                 </div>
             `;
-            document.getElementById("result").classList.remove("hidden");
+            
+            // Switch to chart section
+            showSection('chart');
             
             try {
                 const response = await fetch("/api/calculate", {
@@ -142,85 +327,258 @@
                         name: name,
                         birthDate: date,
                         birthTime: time,
-                        latitude: 13.0827,  // Chennai coordinates
-                        longitude: 80.2707,
+                        latitude: 10.3833,  // Pudukkottai coordinates
+                        longitude: 78.8167,
                         placeName: place,
-                        ayanamsa: ayanamsa
+                        ayanamsa: ayanamsa,
+                        gender: gender,
+                        timezone: timezone
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayChart(data.chart, name);
+                    currentChart = data.chart;
+                    displayProfessionalChart(data.chart);
                 } else {
-                    document.getElementById("result").innerHTML = `
-                        <div class="glass rounded-lg p-4">
-                            <p class="text-red-400">❌ Error: ${data.error}</p>
+                    chartResults.innerHTML = `
+                        <div class="glass rounded-xl p-8 text-center">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
+                            <h3 class="text-xl font-bold text-red-400 mb-2">Calculation Error</h3>
+                            <p class="text-gray-300">${data.error}</p>
                         </div>
                     `;
                 }
                 
             } catch (error) {
-                document.getElementById("result").innerHTML = `
-                    <div class="glass rounded-lg p-4">
-                        <p class="text-red-400">❌ Connection Error: ${error.message}</p>
+                chartResults.innerHTML = `
+                    <div class="glass rounded-xl p-8 text-center">
+                        <i class="fas fa-wifi text-red-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold text-red-400 mb-2">Connection Error</h3>
+                        <p class="text-gray-300">${error.message}</p>
                     </div>
                 `;
             }
         };
 
-        function displayChart(chart, name) {
+        function displayProfessionalChart(chart) {
+            const chartResults = document.getElementById("chart-results");
+            
             let html = `
-                <div class="glass rounded-xl p-6">
-                    <h3 class="text-2xl font-bold mb-4 text-center text-yellow-300">${name}'s KP Chart</h3>
+                <!-- Chart Header -->
+                <div class="glass rounded-xl p-8 mb-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-4xl font-bold gradient-text mb-2">${chart.name}'s Birth Chart</h2>
+                        <p class="text-xl text-gray-300">Krishnamurti Paddhati Analysis</p>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
-                        <div class="glass rounded-lg p-3">
-                            <strong class="text-blue-300">📅 Date:</strong><br>${chart.birthDate}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="text-center glass rounded-lg p-4">
+                            <i class="fas fa-calendar text-blue-400 text-2xl mb-2"></i>
+                            <div class="font-semibold">Birth Date</div>
+                            <div class="text-blue-300">${chart.birthDate}</div>
                         </div>
-                        <div class="glass rounded-lg p-3">
-                            <strong class="text-green-300">⏰ Time:</strong><br>${chart.birthTime}
+                        <div class="text-center glass rounded-lg p-4">
+                            <i class="fas fa-clock text-green-400 text-2xl mb-2"></i>
+                            <div class="font-semibold">Birth Time</div>
+                            <div class="text-green-300">${chart.birthTime}</div>
                         </div>
-                        <div class="glass rounded-lg p-3">
-                            <strong class="text-purple-300">📍 Place:</strong><br>${chart.birthPlace}
+                        <div class="text-center glass rounded-lg p-4">
+                            <i class="fas fa-map-pin text-red-400 text-2xl mb-2"></i>
+                            <div class="font-semibold">Birth Place</div>
+                            <div class="text-red-300">${chart.birthPlace}</div>
+                        </div>
+                        <div class="text-center glass rounded-lg p-4">
+                            <i class="fas fa-compass text-yellow-400 text-2xl mb-2"></i>
+                            <div class="font-semibold">Ayanamsa</div>
+                            <div class="text-yellow-300">${chart.ayanamsa}</div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="text-center mb-6 glass rounded-lg p-4">
-                        <strong class="text-yellow-300">🔮 Ayanamsa:</strong> ${chart.ayanamsa}
-                    </div>
-
-                    <h4 class="text-xl font-bold mb-4 text-yellow-300">🪐 Planetary Positions</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- Planetary Positions -->
+                <div class="glass rounded-xl p-8 mb-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-yellow-300">
+                        <i class="fas fa-globe-americas mr-3"></i>Planetary Positions
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             `;
             
             chart.planets.forEach(planet => {
+                const planetIcons = {
+                    'Sun': 'fas fa-sun text-yellow-400',
+                    'Moon': 'fas fa-moon text-blue-300',
+                    'Mercury': 'fas fa-bolt text-green-400',
+                    'Venus': 'fas fa-heart text-pink-400',
+                    'Mars': 'fas fa-fire text-red-400',
+                    'Jupiter': 'fas fa-crown text-purple-400',
+                    'Saturn': 'fas fa-hourglass text-gray-400',
+                    'Rahu': 'fas fa-dragon text-orange-400',
+                    'Ketu': 'fas fa-eye text-indigo-400'
+                };
+                
                 html += `
-                    <div class="glass rounded-lg p-4 hover:bg-white/10 transition-all">
-                        <div class="font-bold text-lg text-yellow-300">${planet.planet}</div>
-                        <div class="text-orange-300 font-mono">${planet.degree}</div>
-                        <div class="text-blue-300 font-semibold">${planet.sign}</div>
-                        <div class="text-sm text-gray-300">House ${planet.house}</div>
-                        <div class="text-sm text-green-300">${planet.nakshatra}</div>
-                        <div class="text-xs text-purple-300">Star Lord: ${planet.star_lord}</div>
-                        <div class="text-xs text-pink-300">Sub Lord: ${planet.sub_lord}</div>
+                    <div class="planet-card glass rounded-lg p-6 hover:bg-white/5 transition-all">
+                        <div class="flex items-center mb-3">
+                            <i class="${planetIcons[planet.planet] || 'fas fa-star'} text-2xl mr-3"></i>
+                            <div class="font-bold text-xl">${planet.planet}</div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Position:</span>
+                                <span class="text-orange-300 font-mono">${planet.degree}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Sign:</span>
+                                <span class="text-blue-300 font-semibold">${planet.sign}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">House:</span>
+                                <span class="text-purple-300 font-semibold">${planet.house}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Nakshatra:</span>
+                                <span class="text-green-300">${planet.nakshatra}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Star Lord:</span>
+                                <span class="text-purple-300">${planet.star_lord}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Sub Lord:</span>
+                                <span class="text-pink-300">${planet.sub_lord}</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
             
             html += `
                     </div>
-                    
-                    <div class="text-center text-sm text-gray-400 mt-4">
-                        <p>✨ ${chart.calculation_method}</p>
-                        <p>📊 Generated: ${new Date(chart.generated).toLocaleString()}</p>
+                </div>
+
+                <!-- Chart Visualization -->
+                <div class="glass rounded-xl p-8 mb-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-yellow-300">
+                        <i class="fas fa-chart-pie mr-3"></i>Birth Chart Visualization
+                    </h3>
+                    <div class="text-center">
+                        <div class="chart-circle mx-auto mb-6 bg-gray-900/50 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-yellow-400">Rasi Chart</div>
+                                <div class="text-sm text-gray-300">12 Houses</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-400">Interactive chart visualization coming soon...</p>
+                    </div>
+                </div>
+
+                <!-- Quick Analysis -->
+                <div class="glass rounded-xl p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-yellow-300">
+                        <i class="fas fa-eye mr-3"></i>Quick KP Analysis
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass rounded-lg p-6">
+                            <h4 class="text-lg font-bold mb-4 text-green-300">
+                                <i class="fas fa-sun mr-2"></i>Luminaries
+                            </h4>
+                            <div class="space-y-2 text-sm">
+                                <div><strong>Sun:</strong> ${chart.planets.find(p => p.planet === 'Sun')?.sign} - Core personality</div>
+                                <div><strong>Moon:</strong> ${chart.planets.find(p => p.planet === 'Moon')?.sign} - Emotional nature</div>
+                                <div><strong>Ascendant:</strong> ${chart.planets.find(p => p.planet === 'Sun')?.sign} - Life approach</div>
+                            </div>
+                        </div>
+                        <div class="glass rounded-lg p-6">
+                            <h4 class="text-lg font-bold mb-4 text-purple-300">
+                                <i class="fas fa-magic mr-2"></i>KP Specialties
+                            </h4>
+                            <div class="space-y-2 text-sm">
+                                <div><strong>Calculation Method:</strong> ${chart.calculation_method}</div>
+                                <div><strong>Ayanamsa Applied:</strong> ${chart.ayanamsa}</div>
+                                <div><strong>Chart Type:</strong> ${chart.chartType}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
             
-            document.getElementById("result").innerHTML = html;
+            chartResults.innerHTML = html;
         }
+
+        async function loadCurrentTransits() {
+            const transitsResults = document.getElementById("transits-results");
+            transitsResults.innerHTML = `
+                <div class="text-center text-yellow-400">
+                    <div class="animate-spin text-4xl mb-4"><i class="fas fa-globe"></i></div>
+                    <p>Loading current planetary transits...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/transits/current');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `
+                        <div class="text-center mb-6">
+                            <p class="text-gray-300">Calculated at: ${new Date(data.calculation_time).toLocaleString()}</p>
+                            <p class="text-yellow-300">Ayanamsa: ${data.ayanamsa.formatted}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    `;
+                    
+                    data.transits.forEach(transit => {
+                        const retrograde = transit.retrograde ? ' <i class="fas fa-redo text-red-400 ml-1"></i>' : '';
+                        const speedColor = transit.speed > 0 ? 'text-green-400' : 'text-red-400';
+                        
+                        html += `
+                            <div class="planet-card glass rounded-lg p-4">
+                                <div class="font-bold text-lg text-yellow-300 mb-2">
+                                    ${transit.planet}${retrograde}
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="text-orange-300 font-mono">${transit.formatted_position}</div>
+                                    <div class="text-blue-300">${transit.sign}</div>
+                                    <div class="${speedColor}">Speed: ${transit.speed.toFixed(4)}°/day</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    transitsResults.innerHTML = html;
+                } else {
+                    transitsResults.innerHTML = `
+                        <div class="text-center text-red-400">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                            <p>Error loading transits: ${data.error}</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                transitsResults.innerHTML = `
+                    <div class="text-center text-red-400">
+                        <i class="fas fa-wifi text-4xl mb-4"></i>
+                        <p>Connection error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize with default values for Pudukkottai birth data
+        window.addEventListener('load', function() {
+            // Pre-fill the form with the birth data you provided
+            document.getElementById('name').value = 'Selvapriyan';
+            document.getElementById('date').value = '1990-11-25';
+            document.getElementById('time').value = '03:17:00';
+            document.getElementById('place').value = 'Pudukkottai, Tamil Nadu, India';
+            
+            // Show home section by default
+            showSection('home');
+        });
     </script>
 </body>
 </html>
