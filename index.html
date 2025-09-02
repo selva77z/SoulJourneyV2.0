@@ -7,6 +7,7 @@
     <title>🌟 SoulJourney - Professional KP Astrology</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqjqPkQYKh_QrLyQrLyQrLyQrLyQrLyQr&libraries=places" async defer></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
@@ -155,8 +156,14 @@
                             <label class="block text-sm font-medium mb-2">
                                 <i class="fas fa-map-marker-alt text-red-400 mr-2"></i>Birth Place *
                             </label>
-                            <input type="text" placeholder="City, State, Country" id="place" value="Pudukkottai, Tamil Nadu, India"
-                                   class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                            <div class="relative">
+                                <input type="text" placeholder="Start typing city name..." id="place" value="Pudukkottai, Tamil Nadu, India"
+                                       class="w-full p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                                <div id="place-suggestions" class="absolute top-full left-0 right-0 bg-gray-800 border border-gray-600 rounded-lg mt-1 hidden z-50 max-h-48 overflow-y-auto"></div>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-400">
+                                <span id="coordinates-display">Coordinates: 10.3833°N, 78.8167°E</span>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">
@@ -297,10 +304,15 @@
             const gender = document.getElementById("gender").value;
             const timezone = document.getElementById("timezone").value;
             
+            // Debug validation
+            console.log('🔍 Validating fields:', { name, date, time, place, ayanamsa });
+            
             if (!name || !date || !time || !place) {
-                alert('Please fill in all required fields (marked with *)');
+                alert(`Please fill in all required fields:\n- Name: ${name ? '✅' : '❌'}\n- Date: ${date ? '✅' : '❌'}\n- Time: ${time ? '✅' : '❌'}\n- Place: ${place ? '✅' : '❌'}`);
                 return;
             }
+            
+            console.log('✅ All fields validated successfully');
             
             // Show progressive loading states
             const chartResults = document.getElementById("chart-results");
@@ -361,8 +373,8 @@
                         name: name,
                         birthDate: date,
                         birthTime: time,
-                        latitude: 10.3833,  // Pudukkottai coordinates
-                        longitude: 78.8167,
+                        latitude: selectedCoordinates.lat,
+                        longitude: selectedCoordinates.lng,
                         placeName: place,
                         ayanamsa: ayanamsa,
                         gender: gender,
@@ -779,6 +791,100 @@
             return effects[planet] || 'General planetary influence period';
         }
 
+        // Google Places Integration
+        let selectedCoordinates = { lat: 10.3833, lng: 78.8167 }; // Default Pudukkottai
+        
+        function initGooglePlaces() {
+            const placeInput = document.getElementById('place');
+            const suggestionsDiv = document.getElementById('place-suggestions');
+            const coordinatesDisplay = document.getElementById('coordinates-display');
+            
+            // Fallback to manual search if Google Maps not available
+            if (typeof google === 'undefined') {
+                console.log('🌍 Google Maps not loaded, using manual city search');
+                setupManualCitySearch();
+                return;
+            }
+            
+            const autocomplete = new google.maps.places.Autocomplete(placeInput, {
+                types: ['(cities)'],
+                fields: ['place_id', 'geometry', 'name', 'formatted_address']
+            });
+            
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                if (place.geometry) {
+                    selectedCoordinates = {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    };
+                    coordinatesDisplay.textContent = 
+                        `Coordinates: ${selectedCoordinates.lat.toFixed(4)}°N, ${selectedCoordinates.lng.toFixed(4)}°E`;
+                    console.log('📍 Selected place:', place.formatted_address, selectedCoordinates);
+                }
+            });
+        }
+        
+        function setupManualCitySearch() {
+            const placeInput = document.getElementById('place');
+            const suggestionsDiv = document.getElementById('place-suggestions');
+            
+            // Common Indian cities with coordinates
+            const cities = [
+                { name: 'Pudukkottai, Tamil Nadu, India', lat: 10.3833, lng: 78.8167 },
+                { name: 'Chennai, Tamil Nadu, India', lat: 13.0827, lng: 80.2707 },
+                { name: 'Mumbai, Maharashtra, India', lat: 19.0760, lng: 72.8777 },
+                { name: 'Delhi, India', lat: 28.7041, lng: 77.1025 },
+                { name: 'Bangalore, Karnataka, India', lat: 12.9716, lng: 77.5946 },
+                { name: 'Hyderabad, Telangana, India', lat: 17.3850, lng: 78.4867 },
+                { name: 'Kolkata, West Bengal, India', lat: 22.5726, lng: 88.3639 },
+                { name: 'Pune, Maharashtra, India', lat: 18.5204, lng: 73.8567 },
+                { name: 'Ahmedabad, Gujarat, India', lat: 23.0225, lng: 72.5714 },
+                { name: 'Jaipur, Rajasthan, India', lat: 26.9124, lng: 75.7873 }
+            ];
+            
+            placeInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                if (query.length < 2) {
+                    suggestionsDiv.classList.add('hidden');
+                    return;
+                }
+                
+                const matches = cities.filter(city => 
+                    city.name.toLowerCase().includes(query)
+                );
+                
+                if (matches.length > 0) {
+                    suggestionsDiv.innerHTML = matches.map(city => 
+                        `<div class="p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-600 last:border-b-0" 
+                              onclick="selectCity('${city.name}', ${city.lat}, ${city.lng})">
+                            <div class="text-white">${city.name}</div>
+                            <div class="text-xs text-gray-400">${city.lat.toFixed(4)}°N, ${city.lng.toFixed(4)}°E</div>
+                         </div>`
+                    ).join('');
+                    suggestionsDiv.classList.remove('hidden');
+                } else {
+                    suggestionsDiv.classList.add('hidden');
+                }
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!placeInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.classList.add('hidden');
+                }
+            });
+        }
+        
+        function selectCity(cityName, lat, lng) {
+            document.getElementById('place').value = cityName;
+            selectedCoordinates = { lat, lng };
+            document.getElementById('coordinates-display').textContent = 
+                `Coordinates: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+            document.getElementById('place-suggestions').classList.add('hidden');
+            console.log('📍 Selected city:', cityName, { lat, lng });
+        }
+
         // Initialize with default values for Pudukkottai birth data
         window.addEventListener('load', function() {
             // Pre-fill the form with the birth data you provided
@@ -786,6 +892,9 @@
             document.getElementById('date').value = '1990-11-25';
             document.getElementById('time').value = '03:17:00';
             document.getElementById('place').value = 'Pudukkottai, Tamil Nadu, India';
+            
+            // Initialize Google Places or fallback
+            setTimeout(initGooglePlaces, 1000);
             
             // Show home section by default
             showSection('home');
