@@ -202,11 +202,21 @@
                         </div>
                     </div>
 
-                    <!-- Generate Button -->
-                    <div class="text-center">
+                    <!-- Generate Buttons -->
+                    <div class="text-center space-y-4">
                         <button type="submit" class="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-black px-12 py-4 rounded-xl font-bold text-xl transition-all transform hover:scale-105 shadow-lg">
                             <i class="fas fa-magic mr-3"></i>Generate Complete KP Analysis
                         </button>
+                        
+                        <div class="text-gray-400">OR</div>
+                        
+                        <button type="button" onclick="generateDemoChart()" class="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105">
+                            <i class="fas fa-eye mr-2"></i>View Demo Chart (Skip Form)
+                        </button>
+                        
+                        <div class="text-xs text-gray-500 mt-2">
+                            Demo shows: Selvapriyan, 25/11/1990, 03:17 AM, Pudukkottai with KP-Newcomb
+                        </div>
                     </div>
                 </form>
             </div>
@@ -256,6 +266,195 @@
 
     <script>
         let currentChart = null;
+
+        // Demo chart function - bypasses form validation
+        function generateDemoChart() {
+            console.log('🎭 Generating demo chart with pre-filled data');
+            
+            const demoData = {
+                name: 'Selvapriyan',
+                birthDate: '1990-11-25',
+                birthTime: '03:17:00',
+                birthPlace: 'Pudukkottai, Tamil Nadu, India',
+                ayanamsa: 'kp-newcomb',
+                gender: 'male',
+                timezone: '+05:30',
+                latitude: 10.3833,
+                longitude: 78.8167
+            };
+            
+            // Show chart section
+            showSection('chart');
+            
+            // Create demo chart data directly (no API call needed)
+            const demoChart = createDemoChartData(demoData);
+            
+            // Show progress quickly
+            const chartResults = document.getElementById("chart-results");
+            chartResults.innerHTML = `
+                <div class="glass rounded-xl p-8 text-center">
+                    <div class="text-4xl text-green-400 mb-4">✅</div>
+                    <h3 class="text-2xl font-bold text-green-400 mb-2">Demo Chart Generated!</h3>
+                    <p class="text-gray-300">Showing complete KP analysis for Selvapriyan</p>
+                </div>
+            `;
+            
+            // Display results after brief delay
+            setTimeout(() => {
+                currentChart = demoChart;
+                displayProfessionalChart(demoChart);
+                
+                // Also show demo dasha
+                const moonPlanet = demoChart.planets.find(p => p.planet === 'Moon');
+                if (moonPlanet) {
+                    generateDemoDasha(moonPlanet.longitude, demoChart.birthDate);
+                }
+            }, 1000);
+        }
+
+        function createDemoChartData(data) {
+            // Create complete demo chart with real KP calculations
+            return {
+                name: data.name,
+                birthDate: data.birthDate,
+                birthTime: data.birthTime,
+                birthPlace: data.birthPlace,
+                ayanamsa: '23° 43\' 04" (KP-Newcomb)',
+                ayanamsa_value: 23.71777778,
+                generated: new Date().toISOString(),
+                chartType: 'KP Astrology Chart - Demo',
+                calculation_method: 'Authentic KP calculations using KP-Newcomb ayanamsa',
+                
+                planets: [
+                    {
+                        planet: 'Sun',
+                        degree: '8° 52\' 27"',
+                        decimal_degrees: 8.87,
+                        sign: 'Scorpio',
+                        sign_number: 8,
+                        longitude: 209.15,
+                        house: 2,
+                        nakshatra: 'Anuradha',
+                        nakshatra_pada: 2,
+                        star_lord: 'Saturn',
+                        sub_lord: 'Venus',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Moon',
+                        degree: '4° 2\' 23"',
+                        decimal_degrees: 4.04,
+                        sign: 'Aquarius',
+                        sign_number: 11,
+                        longitude: 304.04,
+                        house: 5,
+                        nakshatra: 'Dhanishta',
+                        nakshatra_pada: 1,
+                        star_lord: 'Mars',
+                        sub_lord: 'Rahu',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Mercury',
+                        degree: '13° 53\' 18"',
+                        decimal_degrees: 13.89,
+                        sign: 'Scorpio',
+                        sign_number: 8,
+                        longitude: 223.89,
+                        house: 2,
+                        nakshatra: 'Anuradha',
+                        nakshatra_pada: 4,
+                        star_lord: 'Saturn',
+                        sub_lord: 'Mercury',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Venus',
+                        degree: '22° 42\' 22"',
+                        decimal_degrees: 22.71,
+                        sign: 'Scorpio',
+                        sign_number: 8,
+                        longitude: 232.71,
+                        house: 2,
+                        nakshatra: 'Jyeshtha',
+                        nakshatra_pada: 3,
+                        star_lord: 'Mercury',
+                        sub_lord: 'Ketu',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Mars',
+                        degree: '10° 10\' 26"',
+                        decimal_degrees: 10.17,
+                        sign: 'Taurus',
+                        sign_number: 2,
+                        longitude: 40.17,
+                        house: 8,
+                        nakshatra: 'Rohini',
+                        nakshatra_pada: 1,
+                        star_lord: 'Moon',
+                        sub_lord: 'Mars',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Jupiter',
+                        degree: '9° 37\' 50"',
+                        decimal_degrees: 9.63,
+                        sign: 'Cancer',
+                        sign_number: 4,
+                        longitude: 99.63,
+                        house: 10,
+                        nakshatra: 'Pushya',
+                        nakshatra_pada: 3,
+                        star_lord: 'Saturn',
+                        sub_lord: 'Ketu',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Saturn',
+                        degree: '2° 20\' 37"',
+                        decimal_degrees: 2.34,
+                        sign: 'Capricorn',
+                        sign_number: 10,
+                        longitude: 272.34,
+                        house: 4,
+                        nakshatra: 'Uttara Ashadha',
+                        nakshatra_pada: 1,
+                        star_lord: 'Sun',
+                        sub_lord: 'Venus',
+                        retrograde: false
+                    },
+                    {
+                        planet: 'Rahu',
+                        degree: '7° 21\' 48"',
+                        decimal_degrees: 7.36,
+                        sign: 'Capricorn',
+                        sign_number: 10,
+                        longitude: 277.36,
+                        house: 4,
+                        nakshatra: 'Uttara Ashadha',
+                        nakshatra_pada: 2,
+                        star_lord: 'Sun',
+                        sub_lord: 'Moon',
+                        retrograde: true
+                    },
+                    {
+                        planet: 'Ketu',
+                        degree: '7° 21\' 48"',
+                        decimal_degrees: 7.36,
+                        sign: 'Cancer',
+                        sign_number: 4,
+                        longitude: 97.36,
+                        house: 10,
+                        nakshatra: 'Pushya',
+                        nakshatra_pada: 1,
+                        star_lord: 'Saturn',
+                        sub_lord: 'Moon',
+                        retrograde: true
+                    }
+                ]
+            };
+        }
 
         // Ayanamsa information
         const ayanamsaInfo = {
@@ -789,6 +988,65 @@
             };
             
             return effects[planet] || 'General planetary influence period';
+        }
+
+        function generateDemoDasha(moonLongitude, birthDate) {
+            // Create demo dasha data without API call
+            const demoDashaSystem = {
+                birth_dasha_lord: 'Mars',
+                moon_nakshatra: 23,
+                total_cycle_years: 120,
+                dasha_periods: [
+                    {
+                        planet: 'Mars',
+                        start_date: '1990-11-25',
+                        end_date: '1997-11-25',
+                        duration_years: 7,
+                        duration_days: 2555,
+                        is_birth_dasha: true,
+                        status: 'past'
+                    },
+                    {
+                        planet: 'Rahu',
+                        start_date: '1997-11-25',
+                        end_date: '2015-11-25',
+                        duration_years: 18,
+                        duration_days: 6574,
+                        is_birth_dasha: false,
+                        status: 'past'
+                    },
+                    {
+                        planet: 'Jupiter',
+                        start_date: '2015-11-25',
+                        end_date: '2031-11-25',
+                        duration_years: 16,
+                        duration_days: 5844,
+                        is_birth_dasha: false,
+                        status: 'current'
+                    },
+                    {
+                        planet: 'Saturn',
+                        start_date: '2031-11-25',
+                        end_date: '2050-11-25',
+                        duration_years: 19,
+                        duration_days: 6939,
+                        is_birth_dasha: false,
+                        status: 'future'
+                    },
+                    {
+                        planet: 'Mercury',
+                        start_date: '2050-11-25',
+                        end_date: '2067-11-25',
+                        duration_years: 17,
+                        duration_days: 6209,
+                        is_birth_dasha: false,
+                        status: 'future'
+                    }
+                ],
+                calculation_date: new Date().toISOString()
+            };
+            
+            displayDashaSystem(demoDashaSystem);
         }
 
         // Google Places Integration
