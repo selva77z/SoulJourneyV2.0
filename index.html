@@ -302,21 +302,54 @@
                 return;
             }
             
-            // Show loading state
+            // Show progressive loading states
             const chartResults = document.getElementById("chart-results");
-            chartResults.innerHTML = `
-                <div class="glass rounded-xl p-8 text-center">
-                    <div class="animate-spin text-6xl text-yellow-400 mb-4">
-                        <i class="fas fa-star"></i>
+            
+            function updateProgress(step, message) {
+                chartResults.innerHTML = `
+                    <div class="glass rounded-xl p-8 text-center">
+                        <div class="animate-spin text-6xl text-yellow-400 mb-4">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-yellow-300">Step ${step}: ${message}</h3>
+                        <p class="text-gray-300 mb-2">Using ${ayanamsaInfo[ayanamsa].split(' (')[0]} Ayanamsa</p>
+                        <div class="mt-4 space-y-2 text-sm text-left max-w-md mx-auto">
+                            <div class="flex items-center ${step >= 1 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Validating input data
+                            </div>
+                            <div class="flex items-center ${step >= 2 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Parsing birth information
+                            </div>
+                            <div class="flex items-center ${step >= 3 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Applying ayanamsa correction
+                            </div>
+                            <div class="flex items-center ${step >= 4 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Calculating planetary positions
+                            </div>
+                            <div class="flex items-center ${step >= 5 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Computing nakshatras & sub-lords
+                            </div>
+                            <div class="flex items-center ${step >= 6 ? 'text-green-400' : 'text-gray-500'}">
+                                <i class="fas fa-check-circle mr-2"></i>Generating chart display
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4 text-yellow-300">Calculating Your KP Chart...</h3>
-                    <p class="text-gray-300 mb-2">Using ${ayanamsaInfo[ayanamsa].split(' (')[0]} Ayanamsa</p>
-                    <p class="text-sm text-gray-400">This may take a few moments for precise calculations</p>
-                </div>
-            `;
+                `;
+            }
+            
+            updateProgress(1, "Validating Input Data");
             
             // Switch to chart section
             showSection('chart');
+            
+            // Step 2: Parsing data
+            setTimeout(() => updateProgress(2, "Parsing Birth Information"), 200);
+            
+            // Step 3: Preparing request
+            setTimeout(() => updateProgress(3, "Applying Ayanamsa Correction"), 400);
+            
+            // Step 4: Making API call
+            setTimeout(() => updateProgress(4, "Calculating Planetary Positions"), 600);
             
             try {
                 const response = await fetch("/api/calculate", {
@@ -337,11 +370,23 @@
                     })
                 });
                 
+                // Step 5: Processing response
+                updateProgress(5, "Computing Nakshatras & Sub-Lords");
+                
                 const data = await response.json();
                 
+                console.log('📊 API Response received:', data.success ? 'SUCCESS' : 'ERROR'); // Debug log
+                console.log('🔍 Response data:', data); // Full response for debugging
+                
                 if (data.success) {
-                    currentChart = data.chart;
-                    displayProfessionalChart(data.chart);
+                    // Step 6: Final display
+                    updateProgress(6, "Generating Chart Display");
+                    
+                    // Small delay to show final step, then display results
+                    setTimeout(() => {
+                        currentChart = data.chart;
+                        displayProfessionalChart(data.chart);
+                    }, 500);
                     
                     // Also calculate Dasha system
                     const moonPlanet = data.chart.planets.find(p => p.planet === 'Moon');
@@ -359,11 +404,21 @@
                 }
                 
             } catch (error) {
+                console.error('❌ Full error details:', error); // Debug log
+                
                 chartResults.innerHTML = `
                     <div class="glass rounded-xl p-8 text-center">
                         <i class="fas fa-wifi text-red-400 text-4xl mb-4"></i>
                         <h3 class="text-xl font-bold text-red-400 mb-2">Connection Error</h3>
-                        <p class="text-gray-300">${error.message}</p>
+                        <p class="text-gray-300 mb-4">${error.message}</p>
+                        <div class="text-left text-sm bg-gray-800/50 p-4 rounded-lg">
+                            <strong class="text-yellow-300">Debug Info:</strong><br>
+                            <span class="text-gray-400">Error Type:</span> ${error.name}<br>
+                            <span class="text-gray-400">URL:</span> /api/calculate<br>
+                            <span class="text-gray-400">Method:</span> POST<br>
+                            <span class="text-gray-400">Time:</span> ${new Date().toLocaleTimeString()}<br>
+                            <span class="text-gray-400">Check browser console for details</span>
+                        </div>
                     </div>
                 `;
             }
