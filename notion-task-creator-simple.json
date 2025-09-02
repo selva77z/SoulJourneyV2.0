@@ -1,0 +1,404 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notion Task Creator",
+    "version": "1.0.0",
+    "description": "Simple Notion integration for creating and managing tasks with categories."
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "paths": {
+    "/v1/pages": {
+      "post": {
+        "operationId": "createTask",
+        "summary": "Create a new task in your Tasks database",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2022-06-28"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "properties": {
+                      "database_id": {
+                        "type": "string",
+                        "default": "1ab90974f52481cb8a4ced86a9b547d8",
+                        "description": "Your Tasks database ID"
+                      }
+                    },
+                    "required": ["database_id"]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "Task Name": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "text": {
+                                  "type": "object",
+                                  "properties": {
+                                    "content": {
+                                      "type": "string",
+                                      "description": "The task title/name"
+                                    }
+                                  },
+                                  "required": ["content"]
+                                }
+                              },
+                              "required": ["text"]
+                            }
+                          }
+                        },
+                        "required": ["title"]
+                      },
+                      "Category": {
+                        "type": "object",
+                        "properties": {
+                          "relation": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "enum": [
+                                    "1ac90974-f524-8137-9c1c-e0b55df6fa8b",
+                                    "1ac90974-f524-8108-b891-f57b9cbb0c41"
+                                  ],
+                                  "description": "Category ID: Growth & Mastery (1ac90974-f524-8137-9c1c-e0b55df6fa8b) or Daily Foundations (1ac90974-f524-8108-b891-f57b9cbb0c41)"
+                                }
+                              },
+                              "required": ["id"]
+                            }
+                          }
+                        },
+                        "required": ["relation"]
+                      },
+                      "Impact": {
+                        "type": "object",
+                        "properties": {
+                          "select": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "enum": ["Low", "Medium", "High"],
+                                "description": "Impact level of the task"
+                              }
+                            },
+                            "required": ["name"]
+                          }
+                        },
+                        "required": ["select"]
+                      },
+                      "Effort": {
+                        "type": "object",
+                        "properties": {
+                          "select": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "enum": ["Low", "Medium", "High"],
+                                "description": "Effort level required for the task"
+                              }
+                            },
+                            "required": ["name"]
+                          }
+                        },
+                        "required": ["select"]
+                      }
+                    },
+                    "required": ["Task Name"]
+                  }
+                },
+                "required": ["parent", "properties"]
+              },
+              "examples": {
+                "buyWatch": {
+                  "summary": "Create 'Buy Watch' task in Daily Foundations",
+                  "value": {
+                    "parent": {
+                      "database_id": "1ab90974f52481cb8a4ced86a9b547d8"
+                    },
+                    "properties": {
+                      "Task Name": {
+                        "title": [
+                          {
+                            "text": {
+                              "content": "Buy Watch"
+                            }
+                          }
+                        ]
+                      },
+                      "Category": {
+                        "relation": [
+                          {
+                            "id": "1ac90974-f524-8108-b891-f57b9cbb0c41"
+                          }
+                        ]
+                      },
+                      "Impact": {
+                        "select": {
+                          "name": "Medium"
+                        }
+                      },
+                      "Effort": {
+                        "select": {
+                          "name": "Medium"
+                        }
+                      }
+                    }
+                  }
+                },
+                "buyMacbook": {
+                  "summary": "Create 'Buy MacBook' task in Growth & Mastery",
+                  "value": {
+                    "parent": {
+                      "database_id": "1ab90974f52481cb8a4ced86a9b547d8"
+                    },
+                    "properties": {
+                      "Task Name": {
+                        "title": [
+                          {
+                            "text": {
+                              "content": "Buy MacBook"
+                            }
+                          }
+                        ]
+                      },
+                      "Category": {
+                        "relation": [
+                          {
+                            "id": "1ac90974-f524-8137-9c1c-e0b55df6fa8b"
+                          }
+                        ]
+                      },
+                      "Impact": {
+                        "select": {
+                          "name": "High"
+                        }
+                      },
+                      "Effort": {
+                        "select": {
+                          "name": "High"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the created task page"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created_time": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing bearer token"
+          },
+          "404": {
+            "description": "Database not found or not accessible"
+          }
+        }
+      }
+    },
+    "/v1/databases/{database_id}/query": {
+      "post": {
+        "operationId": "getTasks",
+        "summary": "Get tasks from your Tasks database",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2022-06-28"
+            }
+          },
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "1ab90974f52481cb8a4ced86a9b547d8",
+              "description": "Your Tasks database ID"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "object",
+                    "description": "Filter criteria"
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tasks retrieved successfully"
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "operationId": "findCategories",
+        "summary": "Search for category pages in your workspace",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "2022-06-28"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search for category names like 'Growth', 'Daily', 'Inner', 'Life'"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "properties": {
+                      "property": {
+                        "type": "string",
+                        "enum": ["object"]
+                      },
+                      "value": {
+                        "type": "string",
+                        "enum": ["page"]
+                      }
+                    },
+                    "required": ["property", "value"]
+                  }
+                },
+                "required": ["query", "filter"]
+              },
+              "examples": {
+                "findGrowthCategory": {
+                  "summary": "Find Growth & Mastery category",
+                  "value": {
+                    "query": "Growth",
+                    "filter": {
+                      "property": "object",
+                      "value": "page"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category search results"
+          }
+        }
+      }
+    }
+  }
+}
