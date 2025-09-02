@@ -1,0 +1,780 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notion GPT Actions (Fixed)",
+    "version": "1.0.0",
+    "description": "Fixed Notion actions to create/read/update tasks and append content for ChatGPT Actions compatibility."
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "DatabaseParent": {
+        "type": "object",
+        "properties": {
+          "database_id": {
+            "type": "string",
+            "description": "The ID of the database to create the page in"
+          }
+        },
+        "required": ["database_id"]
+      },
+      "PageParent": {
+        "type": "object", 
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "description": "The ID of the page to create the child page under"
+          }
+        },
+        "required": ["page_id"]
+      },
+      "TitleProperty": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["content"]
+                }
+              },
+              "required": ["text"]
+            }
+          }
+        },
+        "required": ["title"]
+      },
+      "SelectProperty": {
+        "type": "object",
+        "properties": {
+          "select": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["select"]
+      },
+      "RelationProperty": {
+        "type": "object",
+        "properties": {
+          "relation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["id"]
+            }
+          }
+        },
+        "required": ["relation"]
+      }
+    }
+  },
+  "paths": {
+    "/v1/databases/{database_id}": {
+      "get": {
+        "operationId": "getDatabase",
+        "summary": "Verify/inspect a database by ID",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Database retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/pages/{page_id}": {
+      "get": {
+        "operationId": "getPage",
+        "summary": "Verify/inspect a page by ID",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updatePageProperties",
+        "summary": "Update a page's database properties",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "properties": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Database property updates - each property can be title, select, relation, etc."
+                  }
+                },
+                "required": ["properties"]
+              },
+              "examples": {
+                "updateTaskStatus": {
+                  "summary": "Update task status",
+                  "value": {
+                    "properties": {
+                      "Status": {
+                        "select": {
+                          "name": "Done"
+                        }
+                      }
+                    }
+                  }
+                },
+                "updateTaskWithCategory": {
+                  "summary": "Update task name and category",
+                  "value": {
+                    "properties": {
+                      "Task Name": {
+                        "title": [
+                          {
+                            "text": {
+                              "content": "Buy Watch"
+                            }
+                          }
+                        ]
+                      },
+                      "Category": {
+                        "relation": [
+                          {
+                            "id": "1ac90974-f524-8108-b891-f57b9cbb0c41"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Page updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/pages": {
+      "post": {
+        "operationId": "createPageInDatabase",
+        "summary": "Create a task (page) in a database",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parent": {
+                    "oneOf": [
+                      {"$ref": "#/components/schemas/DatabaseParent"},
+                      {"$ref": "#/components/schemas/PageParent"}
+                    ],
+                    "description": "Provide either database_id OR page_id as parent"
+                  },
+                  "properties": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Database property values if parent is a database"
+                  },
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Optional initial blocks (paragraph/code/etc.)"
+                  }
+                },
+                "required": ["parent"]
+              },
+              "examples": {
+                "createTaskInDatabase": {
+                  "summary": "Create a task in your Tasks database",
+                  "value": {
+                    "parent": {
+                      "database_id": "1ab90974f52481cb8a4ced86a9b547d8"
+                    },
+                    "properties": {
+                      "Task Name": {
+                        "title": [
+                          {
+                            "text": {
+                              "content": "Buy Watch"
+                            }
+                          }
+                        ]
+                      },
+                      "Category": {
+                        "relation": [
+                          {
+                            "id": "1ac90974-f524-8108-b891-f57b9cbb0c41"
+                          }
+                        ]
+                      },
+                      "Impact": {
+                        "select": {
+                          "name": "Medium"
+                        }
+                      },
+                      "Effort": {
+                        "select": {
+                          "name": "Medium"
+                        }
+                      }
+                    }
+                  }
+                },
+                "createBasicTask": {
+                  "summary": "Create a basic task with just a title",
+                  "value": {
+                    "parent": {
+                      "database_id": "1ab90974f52481cb8a4ced86a9b547d8"
+                    },
+                    "properties": {
+                      "Task Name": {
+                        "title": [
+                          {
+                            "text": {
+                              "content": "New Task"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Page created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the created page"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created_time": {
+                      "type": "string"
+                    },
+                    "last_edited_time": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/databases/{database_id}/query": {
+      "post": {
+        "operationId": "queryDatabase",
+        "summary": "Query tasks/rows from a database",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "object",
+                    "description": "Filter criteria for the query"
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Sort criteria for the query"
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "description": "Number of results to return"
+                  }
+                }
+              },
+              "examples": {
+                "queryTodoTasks": {
+                  "summary": "Get all To Do tasks",
+                  "value": {
+                    "filter": {
+                      "property": "Status",
+                      "select": {
+                        "equals": "To Do"
+                      }
+                    },
+                    "sorts": [
+                      {
+                        "property": "Last edited time",
+                        "direction": "descending"
+                      }
+                    ]
+                  }
+                },
+                "queryAllTasks": {
+                  "summary": "Get all tasks without filter",
+                  "value": {
+                    "page_size": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blocks/{block_id}/children": {
+      "get": {
+        "operationId": "getBlockChildren",
+        "summary": "Read a page/block's child blocks (page content)",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Children retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "appendBlockChildren",
+        "summary": "Append text/code blocks to a page or block",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Array of block objects to append"
+                  }
+                },
+                "required": ["children"]
+              },
+              "examples": {
+                "appendParagraph": {
+                  "summary": "Add a text paragraph",
+                  "value": {
+                    "children": [
+                      {
+                        "type": "paragraph",
+                        "paragraph": {
+                          "rich_text": [
+                            {
+                              "type": "text",
+                              "text": {
+                                "content": "Note added by GPT."
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "appendCode": {
+                  "summary": "Add a code block",
+                  "value": {
+                    "children": [
+                      {
+                        "type": "code",
+                        "code": {
+                          "language": "python",
+                          "rich_text": [
+                            {
+                              "type": "text",
+                              "text": {
+                                "content": "print('hello from GPT')"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Children appended successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "operationId": "searchNotion",
+        "summary": "Search workspace (pages/databases shared to the integration)",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2022-06-28"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query string"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "properties": {
+                      "property": {
+                        "type": "string",
+                        "enum": ["object"]
+                      },
+                      "value": {
+                        "type": "string",
+                        "enum": ["page", "database"]
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "searchDatabases": {
+                  "summary": "Search for databases",
+                  "value": {
+                    "query": "Tasks",
+                    "filter": {
+                      "property": "object",
+                      "value": "database"
+                    }
+                  }
+                },
+                "searchPages": {
+                  "summary": "Search for pages",
+                  "value": {
+                    "query": "Growth",
+                    "filter": {
+                      "property": "object",
+                      "value": "page"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
