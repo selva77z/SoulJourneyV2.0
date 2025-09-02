@@ -269,47 +269,67 @@
 
         // Demo chart function - bypasses form validation
         function generateDemoChart() {
-            console.log('🎭 Generating demo chart with pre-filled data');
-            
-            const demoData = {
-                name: 'Selvapriyan',
-                birthDate: '1990-11-25',
-                birthTime: '03:17:00',
-                birthPlace: 'Pudukkottai, Tamil Nadu, India',
-                ayanamsa: 'kp-newcomb',
-                gender: 'male',
-                timezone: '+05:30',
-                latitude: 10.3833,
-                longitude: 78.8167
-            };
-            
-            // Show chart section
-            showSection('chart');
-            
-            // Create demo chart data directly (no API call needed)
-            const demoChart = createDemoChartData(demoData);
-            
-            // Show progress quickly
-            const chartResults = document.getElementById("chart-results");
-            chartResults.innerHTML = `
-                <div class="glass rounded-xl p-8 text-center">
-                    <div class="text-4xl text-green-400 mb-4">✅</div>
-                    <h3 class="text-2xl font-bold text-green-400 mb-2">Demo Chart Generated!</h3>
-                    <p class="text-gray-300">Showing complete KP analysis for Selvapriyan</p>
-                </div>
-            `;
-            
-            // Display results after brief delay
-            setTimeout(() => {
-                currentChart = demoChart;
-                displayProfessionalChart(demoChart);
+            try {
+                console.log('🎭 Starting demo chart generation');
                 
-                // Also show demo dasha
-                const moonPlanet = demoChart.planets.find(p => p.planet === 'Moon');
-                if (moonPlanet) {
-                    generateDemoDasha(moonPlanet.longitude, demoChart.birthDate);
-                }
-            }, 1000);
+                // Show chart section first
+                showSection('chart');
+                
+                const chartResults = document.getElementById("chart-results");
+                
+                // Show immediate loading
+                chartResults.innerHTML = `
+                    <div class="glass rounded-xl p-8 text-center">
+                        <div class="text-4xl text-green-400 mb-4">⚡</div>
+                        <h3 class="text-2xl font-bold text-green-400 mb-2">Loading Demo Chart...</h3>
+                        <p class="text-gray-300">Selvapriyan - 25/11/1990, 03:17 AM, Pudukkottai</p>
+                    </div>
+                `;
+                
+                // Create demo chart immediately
+                const demoChart = {
+                    name: 'Selvapriyan',
+                    birthDate: '1990-11-25',
+                    birthTime: '03:17:00',
+                    birthPlace: 'Pudukkottai, Tamil Nadu, India',
+                    ayanamsa: '23° 43\' 04" (KP-Newcomb)',
+                    generated: new Date().toISOString(),
+                    chartType: 'KP Astrology Chart - Demo',
+                    calculation_method: 'Authentic KP calculations using KP-Newcomb ayanamsa',
+                    
+                    planets: [
+                        { planet: 'Sun', degree: '8° 52\' 27"', sign: 'Scorpio', house: 2, nakshatra: 'Anuradha', star_lord: 'Saturn', sub_lord: 'Venus' },
+                        { planet: 'Moon', degree: '4° 2\' 23"', sign: 'Aquarius', house: 5, nakshatra: 'Dhanishta', star_lord: 'Mars', sub_lord: 'Rahu' },
+                        { planet: 'Mercury', degree: '13° 53\' 18"', sign: 'Scorpio', house: 2, nakshatra: 'Anuradha', star_lord: 'Saturn', sub_lord: 'Mercury' },
+                        { planet: 'Venus', degree: '22° 42\' 22"', sign: 'Scorpio', house: 2, nakshatra: 'Jyeshtha', star_lord: 'Mercury', sub_lord: 'Ketu' },
+                        { planet: 'Mars', degree: '10° 10\' 26"', sign: 'Taurus', house: 8, nakshatra: 'Rohini', star_lord: 'Moon', sub_lord: 'Mars' },
+                        { planet: 'Jupiter', degree: '9° 37\' 50"', sign: 'Cancer', house: 10, nakshatra: 'Pushya', star_lord: 'Saturn', sub_lord: 'Ketu' },
+                        { planet: 'Saturn', degree: '2° 20\' 37"', sign: 'Capricorn', house: 4, nakshatra: 'Uttara Ashadha', star_lord: 'Sun', sub_lord: 'Venus' },
+                        { planet: 'Rahu', degree: '7° 21\' 48"', sign: 'Capricorn', house: 4, nakshatra: 'Uttara Ashadha', star_lord: 'Sun', sub_lord: 'Moon' },
+                        { planet: 'Ketu', degree: '7° 21\' 48"', sign: 'Cancer', house: 10, nakshatra: 'Pushya', star_lord: 'Saturn', sub_lord: 'Moon' }
+                    ]
+                };
+                
+                console.log('✅ Demo chart data created:', demoChart);
+                
+                // Display immediately
+                setTimeout(() => {
+                    currentChart = demoChart;
+                    displayProfessionalChart(demoChart);
+                    console.log('✅ Demo chart displayed');
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ Error in generateDemoChart:', error);
+                const chartResults = document.getElementById("chart-results");
+                chartResults.innerHTML = `
+                    <div class="glass rounded-xl p-8 text-center">
+                        <div class="text-4xl text-red-400 mb-4">❌</div>
+                        <h3 class="text-xl font-bold text-red-400 mb-2">Demo Error</h3>
+                        <p class="text-gray-300">${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
         function createDemoChartData(data) {
