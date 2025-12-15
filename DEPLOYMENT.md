@@ -53,3 +53,19 @@ I have created the `Dockerfile` and `docker-compose.yml` for you.
     ```
 4.  Your app is now live on the server's IP!
 
+## Option 4: Google Cloud Run (Docker-based)
+Yes, Cloud Run is Docker-based! However, since you use a local database file (`sqlite.db`), you must use a **Volume** to save your data.
+
+1.  **Install Google Cloud SDK**: `brew install --cask google-cloud-sdk`
+2.  **Authenticate**: `gcloud auth login`
+3.  **Deploy**:
+    Run this single command (it builds your Dockerfile and deploys):
+    ```bash
+    gcloud run deploy cosmic-horoscopes \
+      --source . \
+      --region australia-southeast1 \
+      --allow-unauthenticated \
+      --add-volume=name=sqlite-data,type=cloud-storage,bucket=your-bucket-name \
+      --add-volume-mount=volume=sqlite-data,mount-path=/app/data
+    ```
+    *Note: You need to create a Cloud Storage Bucket first for the volume.*
