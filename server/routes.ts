@@ -57,27 +57,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       res.setHeader('Content-Type', 'application/json');
       const { name, birthDate, birthTime, birthPlace } = req.body;
-      
+
       console.log(`Calculating KP positions for: ${name}, ${birthDate}, ${birthTime}, ${birthPlace}`);
-      
+
       // Use Swiss Ephemeris Python script for authentic calculations
       const pythonScript = path.join(process.cwd(), 'server', 'swiss_chart_generator.py');
-      
-      const pythonProcess = spawn('.pythonlibs/bin/python', [pythonScript, birthDate, birthTime, birthPlace], {
+
+      const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+      const pythonProcess = spawn(pythonCommand, [pythonScript, birthDate, birthTime, birthPlace], {
         cwd: process.cwd()
       });
-      
+
       let pythonOutput = '';
       let pythonError = '';
-      
+
       pythonProcess.stdout.on('data', (data) => {
         pythonOutput += data.toString();
       });
-      
+
       pythonProcess.stderr.on('data', (data) => {
         pythonError += data.toString();
       });
-      
+
       const result: any = await new Promise((resolve, reject) => {
         pythonProcess.on('close', (code) => {
           if (code === 0) {
@@ -96,9 +97,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       });
-      
+
       const planetaryPositions = result.positions;
-      
+
       const chart = {
         name,
         birthDate,
@@ -116,13 +117,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Generated chart with planets:', planetaryPositions.map((p: any) => `${p.planet}: ${p.degree} ${p.sign}`));
       return res.json(chart);
-      
+
     } catch (error: any) {
       console.error("KP Calculation Error:", error);
       res.setHeader('Content-Type', 'application/json');
-      return res.status(500).json({ 
-        error: "Failed to calculate KP positions", 
-        details: error.message 
+      return res.status(500).json({
+        error: "Failed to calculate KP positions",
+        details: error.message
       });
     }
   });
@@ -146,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/parse-prompt', isAuthenticated, async (req, res) => {
     try {
       const { prompt } = req.body;
-      
+
       if (!prompt) {
         return res.status(400).json({ error: "Prompt is required" });
       }
@@ -164,10 +165,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("=== SAVE REQUEST RECEIVED ===");
       console.log("Request body:", req.body);
-      
+
       const userId = req.user.claims.sub;
       console.log("User ID:", userId);
-      
+
       // Transform the data to ensure proper types
       const transformedData = {
         ...req.body,
@@ -175,19 +176,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         latitude: typeof req.body.latitude === 'string' ? parseFloat(req.body.latitude) : req.body.latitude,
         longitude: typeof req.body.longitude === 'string' ? parseFloat(req.body.longitude) : req.body.longitude,
       };
-      
+
       console.log("Transformed data:", transformedData);
-      
+
       const validatedData = insertBirthDataSchema.parse(transformedData);
-      
+
       console.log("Validated data:", validatedData);
-      
+
       const birthData = await storage.createBirthData(validatedData);
       console.log("Birth data created successfully:", birthData);
       res.json(birthData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid birth data",
           details: fromZodError(error).toString()
         });
@@ -224,17 +225,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const birthData = await storage.getBirthDataByUserId(userId);
-      
+
       if (!birthData) {
         return res.status(400).json({ message: "Birth data not found. Please add your birth information first." });
       }
 
       // Calculate KP chart
       const kpChart = await calculateKPChart(birthData);
-      
+
       // Generate AI interpretation
       const aiInterpretation = await generateChartInterpretation(kpChart);
-      
+
       const chartData = {
         userId,
         birthDataId: birthData.id,
@@ -268,10 +269,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { birthDataId, chartData, kpData, chartType } = req.body;
-      
+
       console.log("Saving chart for user:", userId);
       console.log("Chart payload:", { birthDataId, chartType });
-      
+
       const chartPayload = {
         userId,
         birthDataId,
@@ -279,12 +280,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         kpData: typeof kpData === 'string' ? kpData : JSON.stringify(kpData || {}),
         chartType: chartType || "KP Raasi Chart"
       };
-      
+
       console.log("Transformed chart payload:", chartPayload);
-      
+
       const savedChart = await storage.createChart(chartPayload);
       console.log("Chart saved successfully:", savedChart.id);
-      
+
       res.json(savedChart);
     } catch (error: any) {
       console.error("Error saving chart:", error);
@@ -300,12 +301,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         userId,
       });
-      
+
       const profile = await storage.createProfile(validatedData);
       res.json(profile);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid profile data",
           details: fromZodError(error).toString()
         });
@@ -330,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const profileId = parseInt(req.params.id);
-      
+
       // Verify ownership
       const existingProfile = await storage.getProfileByUserId(userId);
       if (!existingProfile || existingProfile.id !== profileId) {
@@ -342,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(profile);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid profile data",
           details: fromZodError(error).toString()
         });
@@ -369,14 +370,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const birthDataList = await storage.getAllBirthDataForBrowsing();
       console.log('Birth data count:', birthDataList.length);
-      
+
       const savedHoroscopes = await Promise.all(
         birthDataList.map(async (birthData) => {
           try {
             // Get chart by birth data ID, not user ID to get individual charts
             const chart = await storage.getChartByBirthDataId(birthData.id);
             console.log(`Chart for ${birthData.name}:`, chart ? 'Found' : 'Not found');
-            
+
             if (!chart) {
               // No chart saved, create a basic placeholder
               return {
@@ -394,17 +395,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 createdAt: birthData.createdAt
               };
             }
-            
+
             // Parse the saved chart data
-            const chartData = typeof chart.chartData === 'string' 
-              ? JSON.parse(chart.chartData) 
+            const chartData = typeof chart.chartData === 'string'
+              ? JSON.parse(chart.chartData)
               : chart.chartData;
-              
+
             // Parse KP data for comprehensive analysis
-            const kpData = typeof chart.kpData === 'string' 
-              ? JSON.parse(chart.kpData) 
+            const kpData = typeof chart.kpData === 'string'
+              ? JSON.parse(chart.kpData)
               : chart.kpData;
-            
+
             return {
               id: birthData.id,
               name: birthData.name,
@@ -437,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         })
       );
-      
+
       const validHoroscopes = savedHoroscopes.filter(h => h !== null);
       console.log('Valid horoscopes count:', validHoroscopes.length);
       res.json(validHoroscopes);
@@ -451,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { charts, ...birthDataInput } = req.body;
-      
+
       // Parse birth date to extract year, month, day
       const birthDate = new Date(birthDataInput.birthDate);
       const year = birthDate.getFullYear();
@@ -482,9 +483,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           longitude: parseFloat(birthData.longitude.toString()),
           timezone: 'Asia/Kolkata' // Default timezone
         };
-        
+
         const kpChart = await generateKPChart(birthInput);
-        
+
         const chartData = {
           userId,
           birthDataId: birthData.id,
@@ -497,14 +498,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         generatedCharts.push(chart);
       }
 
-      res.json({ 
-        birthData, 
+      res.json({
+        birthData,
         charts: generatedCharts,
         message: `Generated ${charts.length} charts successfully`
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid horoscope data",
           details: fromZodError(error).toString()
         });
@@ -519,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const userChart = await storage.getChartByUserId(userId);
-      
+
       if (!userChart) {
         return res.status(400).json({ message: "Chart not found. Please generate your chart first." });
       }
@@ -541,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               compatibilityDetails: compatibilityScore.details,
             },
           };
-          
+
           const match = await storage.createMatch(matchData);
           matches.push(match);
         }
@@ -570,7 +571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const matchId = parseInt(req.params.id);
       const { status } = req.body;
-      
+
       // Verify ownership
       const existingMatch = await storage.getMatchById(matchId);
       if (!existingMatch || existingMatch.userId !== userId) {
@@ -613,7 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { key } = req.params;
       const { value } = req.body;
-      
+
       const setting = await storage.updateAdminSetting(key, value);
       res.json(setting);
     } catch (error) {
@@ -625,17 +626,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GPT Integration API - Middleware for API key authentication
   const validateApiKey = (req: any, res: any, next: any) => {
     const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
-    
+
     // Check for valid API key (you can change this key)
     const validApiKey = process.env.WEBAPP_API_KEY || 'sk-astro-webapp-2025-secure-api-key-xyz789';
-    
+
     if (!apiKey || apiKey !== validApiKey) {
-      return res.status(401).json({ 
-        error: 'Unauthorized', 
-        message: 'Valid API key required in X-API-Key header' 
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Valid API key required in X-API-Key header'
       });
     }
-    
+
     next();
   };
 
@@ -643,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/gpt/process-birth-data', validateApiKey, async (req, res) => {
     try {
       console.log('GPT API called with data:', req.body);
-      
+
       const {
         name,
         gender,
@@ -663,8 +664,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate required fields
       if (!name || !birthDate || !birthTime || !birthPlace) {
-        return res.status(400).json({ 
-          error: 'Missing required fields: name, birthDate, birthTime, birthPlace' 
+        return res.status(400).json({
+          error: 'Missing required fields: name, birthDate, birthTime, birthPlace'
         });
       }
 
@@ -728,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Generate KP chart using real astronomical calculations
         console.log('Generating KP chart...');
         const kpChart = await calculateKPChart(savedBirthData);
-        
+
         // Save chart data
         const chartEntry = {
           userId,
@@ -739,14 +740,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         console.log('Chart entry being saved:', { userId, birthDataId: savedBirthData.id, chartType: 'kp-main' });
-        
+
         const savedChart = await storage.createChart(chartEntry);
         chartData = kpChart;
-        
+
         // Generate AI interpretation
         console.log('Generating AI interpretation...');
         interpretation = await generateChartInterpretation(kpChart);
-        
+
         // Save interpretation
         await storage.createInterpretation({
           chartId: savedChart.id,
@@ -790,9 +791,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error('Error processing GPT birth data:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to process birth data',
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -802,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const chartId = parseInt(req.params.id);
       const chart = await storage.getChartById(chartId);
-      
+
       if (!chart) {
         return res.status(404).json({ error: 'Chart not found' });
       }
@@ -825,7 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GPT API - Pull Data Endpoints (USB-C Style Universal Interface)
-  
+
   // Get all stored birth charts with pagination
   app.get('/api/gpt/pull-charts', validateApiKey, async (req: any, res) => {
     try {
@@ -836,9 +837,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const searchName = req.query.name;
       const searchYear = req.query.year;
       const searchMonth = req.query.month;
-      
+
       let birthDataList;
-      
+
       // Apply filters if provided
       if (searchYear && searchMonth) {
         birthDataList = await storage.getBirthDataByYearAndMonth(parseInt(searchYear), parseInt(searchMonth));
@@ -847,17 +848,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         birthDataList = await storage.getAllBirthDataForBrowsing();
       }
-      
+
       // Filter by name if provided
       if (searchName) {
-        birthDataList = birthDataList.filter(data => 
+        birthDataList = birthDataList.filter(data =>
           data.name.toLowerCase().includes(searchName.toLowerCase())
         );
       }
-      
+
       // Apply pagination
       const paginatedData = birthDataList.slice(offset, offset + limit);
-      
+
       // Format response in standardized JSON (USB-C format)
       const formattedResponse = {
         success: true,
@@ -893,13 +894,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           has_more: offset + limit < birthDataList.length
         }
       };
-      
+
       res.json(formattedResponse);
     } catch (error) {
       console.error('Error fetching birth charts:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to fetch birth charts',
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -911,15 +912,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', 'application/json');
       const birthDataId = parseInt(req.params.id);
       const birthData = await storage.getBirthDataByUserId('gpt-api-user');
-      
+
       if (!birthData) {
         return res.status(404).json({ error: 'Birth chart not found' });
       }
-      
+
       // Get associated chart data
       const chart = await storage.getChartByUserId('gpt-api-user');
       const interpretations = chart ? await storage.getInterpretationsByChartId(chart.id) : [];
-      
+
       // Format response in standardized JSON (USB-C format)
       const formattedResponse = {
         success: true,
@@ -963,13 +964,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       };
-      
+
       res.json(formattedResponse);
     } catch (error) {
       console.error('Error fetching specific chart:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to fetch chart',
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -979,38 +980,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Search charts API called with criteria:', req.query);
       res.setHeader('Content-Type', 'application/json');
-      const { 
-        lagna, 
-        star, 
-        tithi, 
-        year_from, 
-        year_to, 
-        place, 
-        limit = 10, 
-        offset = 0 
+      const {
+        lagna,
+        star,
+        tithi,
+        year_from,
+        year_to,
+        place,
+        limit = 10,
+        offset = 0
       } = req.query;
-      
+
       let birthDataList = await storage.getAllBirthDataForBrowsing();
-      
+
       // Apply filters
       if (lagna) {
-        birthDataList = birthDataList.filter(data => 
+        birthDataList = birthDataList.filter(data =>
           data.lagna?.toLowerCase() === lagna.toLowerCase()
         );
       }
-      
+
       if (star) {
-        birthDataList = birthDataList.filter(data => 
+        birthDataList = birthDataList.filter(data =>
           data.star?.toLowerCase() === star.toLowerCase()
         );
       }
-      
+
       if (tithi) {
-        birthDataList = birthDataList.filter(data => 
+        birthDataList = birthDataList.filter(data =>
           data.tithi?.toLowerCase() === tithi.toLowerCase()
         );
       }
-      
+
       if (year_from || year_to) {
         birthDataList = birthDataList.filter(data => {
           const dataYear = data.year;
@@ -1019,16 +1020,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return true;
         });
       }
-      
+
       if (place) {
-        birthDataList = birthDataList.filter(data => 
+        birthDataList = birthDataList.filter(data =>
           data.birthPlace?.toLowerCase().includes(place.toLowerCase())
         );
       }
-      
+
       // Apply pagination
       const paginatedData = birthDataList.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
-      
+
       // Format response in standardized JSON
       const formattedResponse = {
         success: true,
@@ -1059,13 +1060,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           has_more: parseInt(offset) + parseInt(limit) < birthDataList.length
         }
       };
-      
+
       res.json(formattedResponse);
     } catch (error) {
       console.error('Error searching charts:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to search charts',
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -1076,7 +1077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Available years API called');
       res.setHeader('Content-Type', 'application/json');
       const years = await storage.getAvailableYears();
-      
+
       res.json({
         success: true,
         data: {
@@ -1090,9 +1091,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error fetching available years:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to fetch available years',
-        message: error.message 
+        message: error.message
       });
     }
   });
@@ -1103,21 +1104,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/generate-astrology', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       // Get user's birth data and chart
       const birthData = await storage.getBirthDataByUserId(userId);
       if (!birthData) {
         return res.status(404).json({ error: 'Birth data not found. Please complete your birth details first.' });
       }
-      
+
       const chart = await storage.getChartByUserId(userId);
       if (!chart) {
         return res.status(404).json({ error: 'Chart not found. Please generate your chart first.' });
       }
-      
+
       // Generate comprehensive astrology profile
       const astrologyProfile = await generateAstrologyProfile(birthData, chart);
-      
+
       // Update or create profile with astrology data
       const existingProfile = await storage.getProfileByUserId(userId);
       if (existingProfile) {
@@ -1155,16 +1156,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/matches/discover', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       // Get user's profile
       const userProfile = await storage.getProfileByUserId(userId);
       if (!userProfile || !userProfile.astrologyProfile) {
         return res.status(404).json({ error: 'Complete your astrology profile first' });
       }
-      
+
       // Get all other visible profiles
       const potentialMatches = await storage.getVisibleProfiles(userId);
-      
+
       // Calculate compatibility scores
       const compatibilityResults = [];
       for (const match of potentialMatches) {
@@ -1173,7 +1174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userProfile.astrologyProfile as any,
             match.astrologyProfile as any
           );
-          
+
           compatibilityResults.push({
             profile: match,
             compatibility: compatibilityScore,
@@ -1181,10 +1182,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       // Sort by compatibility score (highest first)
       compatibilityResults.sort((a, b) => b.matchScore - a.matchScore);
-      
+
       // Return top matches
       const topMatches = compatibilityResults.slice(0, 20);
       res.json(topMatches);
@@ -1199,15 +1200,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { matchedUserId, action, compatibilityScore } = req.body;
-      
+
       // Get both user profiles
       const userProfile = await storage.getProfileByUserId(userId);
       const matchedProfile = await storage.getProfileByUserId(matchedUserId);
-      
+
       if (!userProfile || !matchedProfile) {
         return res.status(404).json({ error: 'User profiles not found' });
       }
-      
+
       // Record interaction for AI learning
       aiLearningEngine.addLearningData({
         userId,
@@ -1220,7 +1221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           user2: matchedProfile.astrologyProfile as any
         }
       });
-      
+
       // Create match record if it's a positive interaction
       if (action === 'swipe_right' || action === 'match') {
         await storage.createMatch({
@@ -1234,7 +1235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: action === 'match' ? 'mutual' : 'liked'
         });
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error('Error recording interaction:', error);

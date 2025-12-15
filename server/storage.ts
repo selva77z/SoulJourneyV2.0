@@ -20,7 +20,7 @@ import {
   type InsertInterpretation,
   type AdminSetting,
   type InsertAdminSetting,
-} from "@shared/schema";
+} from "@shared/schema-sqlite";
 import { db } from "./db-local";
 import { eq, and, desc, asc, or, sql } from "drizzle-orm";
 
@@ -29,16 +29,18 @@ export interface IStorage {
   // User operations (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+
   // Birth data operations
   createBirthData(data: InsertBirthData): Promise<BirthData>;
   getBirthDataByUserId(userId: string): Promise<BirthData | undefined>;
   updateBirthData(id: number, data: Partial<InsertBirthData>): Promise<BirthData>;
-  getAllBirthDataForBrowsing(): Promise<BirthData[]>;
+  getAllBirthDataForBrowsing(userId?: string): Promise<BirthData[]>;
+  getBirthData(id: number): Promise<BirthData | undefined>;
   getBirthDataByYear(year: number): Promise<BirthData[]>;
   getBirthDataByYearAndMonth(year: number, month: number): Promise<BirthData[]>;
   getAvailableYears(): Promise<number[]>;
-  
+  deleteBirthData(id: number): Promise<void>;
+
   // Chart operations
   createChart(data: InsertChart): Promise<Chart>;
   getChartByUserId(userId: string): Promise<Chart | undefined>;
@@ -47,23 +49,23 @@ export interface IStorage {
   getChartById(id: number): Promise<Chart | undefined>;
   updateChart(id: number, data: Partial<InsertChart>): Promise<Chart>;
   deleteChart(id: number): Promise<boolean>;
-  
+
   // Profile operations
   createProfile(data: InsertProfile): Promise<Profile>;
   getProfileByUserId(userId: string): Promise<Profile | undefined>;
   updateProfile(id: number, data: Partial<InsertProfile>): Promise<Profile>;
   getVisibleProfiles(excludeUserId?: string): Promise<Profile[]>;
-  
+
   // Match operations
   createMatch(data: InsertMatch): Promise<Match>;
   getMatchesByUserId(userId: string): Promise<Match[]>;
   updateMatchStatus(id: number, status: string): Promise<Match>;
   getMatchById(id: number): Promise<Match | undefined>;
-  
+
   // Interpretation operations
   createInterpretation(data: InsertInterpretation): Promise<Interpretation>;
   getInterpretationsByChartId(chartId: number): Promise<Interpretation[]>;
-  
+
   // Admin operations
   createAdminSetting(data: InsertAdminSetting): Promise<AdminSetting>;
   getAdminSetting(key: string): Promise<AdminSetting | undefined>;
@@ -102,6 +104,14 @@ export class DatabaseStorage implements IStorage {
     return birthDataRecord;
   }
 
+  async getBirthData(id: number): Promise<BirthData | undefined> {
+    const [birthDataRecord] = await db
+      .select()
+      .from(birthData)
+      .where(eq(birthData.id, id));
+    return birthDataRecord;
+  }
+
   async getBirthDataByUserId(userId: string): Promise<BirthData | undefined> {
     const [birthDataRecord] = await db
       .select()
@@ -120,8 +130,12 @@ export class DatabaseStorage implements IStorage {
     return birthDataRecord;
   }
 
-  async getAllBirthDataForBrowsing(): Promise<BirthData[]> {
-    return await db.select().from(birthData).orderBy(birthData.year, birthData.month, birthData.day);
+  async getAllBirthDataForBrowsing(userId?: string): Promise<BirthData[]> {
+    let query = db.select().from(birthData);
+    if (userId) {
+      query = query.where(eq(birthData.userId, userId));
+    }
+    return await query.orderBy(birthData.year, birthData.month, birthData.day);
   }
 
   async getBirthDataByYear(year: number): Promise<BirthData[]> {
@@ -135,6 +149,10 @@ export class DatabaseStorage implements IStorage {
   async getAvailableYears(): Promise<number[]> {
     const result = await db.selectDistinct({ year: birthData.year }).from(birthData).orderBy(birthData.year);
     return result.map((row: { year: number }) => row.year);
+  }
+
+  async deleteBirthData(id: number): Promise<void> {
+    await db.delete(birthData).where(eq(birthData.id, id));
   }
 
   // Chart operations
@@ -311,7 +329,7 @@ export class DatabaseStorage implements IStorage {
   async updateAdminSetting(key: string, value: any): Promise<AdminSetting> {
     const [setting] = await db
       .update(adminSettings)
-      .set({ 
+      .set({
         settingValue: value,
         updatedAt: new Date()
       })

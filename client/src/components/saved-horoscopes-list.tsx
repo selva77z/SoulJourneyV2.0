@@ -49,7 +49,7 @@ const fetchSavedHoroscopes = async (): Promise<SavedHoroscope[]> => {
 export function SavedHoroscopesList() {
   const [selectedHoroscope, setSelectedHoroscope] = useState<SavedHoroscope | null>(null);
   const { toast } = useToast();
-  
+
   const { data: horoscopes, isLoading, error } = useQuery({
     queryKey: ['savedHoroscopes'],
     queryFn: fetchSavedHoroscopes,
@@ -119,9 +119,7 @@ export function SavedHoroscopesList() {
   };
 
   const handleDeleteChart = (horoscopeId: number, horoscopeName: string) => {
-    if (confirm(`Are you sure you want to delete the chart for "${horoscopeName}"? This action cannot be undone.`)) {
-      deleteHoroscopeMutation.mutate(horoscopeId);
-    }
+    deleteHoroscopeMutation.mutate(horoscopeId);
   };
 
   return (
@@ -146,7 +144,7 @@ export function SavedHoroscopesList() {
                     <p className="text-sm text-gray-500">{horoscope.place}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-center space-x-4 text-xs text-gray-600">
                   <div className="flex items-center space-x-1">
                     <Star className="w-3 h-3" />
@@ -157,23 +155,23 @@ export function SavedHoroscopesList() {
                     <span>Swiss Ephemeris</span>
                   </div>
                 </div>
-                
+
                 <div className="pt-3">
                   <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 mb-3">
                     {horoscope.calculation_type || 'Professional KP Analysis'}
                   </Badge>
                 </div>
               </div>
-              
+
               <div className="mt-4 space-y-2">
-                <Button 
-                  onClick={() => handleOpenChart(horoscope)} 
+                <Button
+                  onClick={() => handleOpenChart(horoscope)}
                   className="bg-cosmic-purple hover:bg-cosmic-purple/80 text-white w-full"
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   Open Complete KP Analysis
                 </Button>
-                <Button 
+                <Button
                   onClick={() => handleDeleteChart(horoscope.id, horoscope.name)}
                   disabled={deleteHoroscopeMutation.isPending}
                   variant="outline"
@@ -191,12 +189,12 @@ export function SavedHoroscopesList() {
 
       {/* Modal for detailed view */}
       {selectedHoroscope && (
-        <KPChartDetail 
-          horoscope={selectedHoroscope} 
+        <KPChartDetail
+          horoscope={selectedHoroscope}
           onClose={handleCloseChart}
         />
       )}
-      
+
       {/* Debug info */}
       {selectedHoroscope && (
         <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded text-xs">

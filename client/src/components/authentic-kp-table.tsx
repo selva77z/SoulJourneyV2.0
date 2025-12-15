@@ -74,7 +74,7 @@ export function AuthenticKPTable({ planets, title = "Authentic KP Planetary Posi
                     {planet.degree}°
                   </td>
                   <td className="border border-gray-300 px-3 py-2 text-gray-700 font-mono text-xs">
-                    {planet.longitude.toFixed(2)}°
+                    {planet.longitude?.toFixed(2) ?? "0.00"}°
                   </td>
                   <td className="border border-gray-300 px-3 py-2 text-green-700 text-sm">
                     {planet.nakshatra}
@@ -99,7 +99,7 @@ export function AuthenticKPTable({ planets, title = "Authentic KP Planetary Posi
             </tbody>
           </table>
         </div>
-        
+
         {/* KP System Information */}
         <div className="p-4 bg-blue-50 border-t">
           <div className="text-sm text-gray-700">

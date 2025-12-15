@@ -10,6 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { KPChartDetail } from "./kp-chart-detail";
+import { KPChartTable } from "@/components/kp-chart-table";
+import { KPCuspTable } from "@/components/kp-cusp-table";
+import { SouthIndianChart } from "@/components/south-indian-chart";
+import { DasaDisplay } from "@/components/dasa-display";
 
 import { z } from "zod";
 
@@ -31,17 +35,17 @@ function calculateJulianDay(date: Date): number {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  
+
   let a = Math.floor((14 - month) / 12);
   let y = year + 4800 - a;
   let m = month + 12 * a - 3;
-  
+
   return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
 }
 
 function getSign(longitude: number): string {
-  const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
-                 "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+  const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
   return signs[Math.floor(longitude / 30) % 12];
 }
 
@@ -72,9 +76,9 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
     resolver: zodResolver(horoscopeFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      birthDate: initialData?.birthDate || "25111990",
-      birthTime: initialData?.birthTime || "03:17:25",
-      birthPlace: initialData?.birthPlace || "Pudukkottai",
+      birthDate: initialData?.birthDate || "",
+      birthTime: initialData?.birthTime || "",
+      birthPlace: initialData?.birthPlace || "",
       latitude: initialData?.latitude || "",
       longitude: initialData?.longitude || "",
     },
@@ -109,7 +113,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
       );
       const data = await response.json();
-      
+
       const formattedSuggestions = data.map((item: any) => ({
         display_name: item.display_name,
         lat: item.lat,
@@ -118,7 +122,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
         state: item.address?.state || item.address?.region || '',
         city: item.address?.city || item.address?.town || item.address?.village || ''
       }));
-      
+
       setLocationSuggestions(formattedSuggestions);
       setShowSuggestions(true);
     } catch (error) {
@@ -153,14 +157,14 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
           longitude: data.longitude || "78.821389"
         }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error("Failed to generate horoscope: " + errorText);
       }
-      
+
       const result = await response.json();
-      
+
       // Format the result for the frontend chart display
       const chart = {
         name: data.name,
@@ -171,33 +175,33 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
         longitude: parseFloat(data.longitude || "78.821389"),
         generated: new Date().toISOString(),
         chartType: "KP Raasi Chart",
-        
+
         // Use accurate Swiss Ephemeris calculations from the API
         planets: result.planets || [],
         houses: result.houses || [],
-        
+
         kpSystem: {
           significators: "Calculated using Swiss Ephemeris with KP Ayanamsa 23° 43' 07\"",
           rulingPlanets: result.rulingPlanets || ["Mercury", "Venus", "Sun"],
           analysis: "This chart shows planetary positions calculated using Swiss Ephemeris with authentic KP ayanamsa for accurate predictions."
         },
-        
+
         message: "Horoscope generated successfully using Swiss Ephemeris with KP astrological calculations"
       };
-      
+
       return chart;
     },
     onSuccess: (chart) => {
       console.log("Generated chart:", chart);
       console.log("Setting chart state...");
-      
+
       // Force React re-render by updating both state and render key
       setGeneratedChart(chart);
       setRenderKey(prev => prev + 1);
       console.log("Chart state set successfully");
-      
+
       toast({
-        title: "Success", 
+        title: "Success",
         description: "Horoscope generated successfully! Click Save to store this chart.",
       });
     },
@@ -224,22 +228,22 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
   const saveChartMutation = useMutation({
     mutationFn: async (chartData: any) => {
       console.log("Saving complete chart data:", chartData);
-      
+
       // Use the new single endpoint to save horoscope data
       const response = await fetch("/api/horoscopes/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(chartData),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error("Failed to save horoscope: " + errorText);
       }
-      
+
       const result = await response.json();
       console.log("Horoscope saved successfully:", result);
-      
+
       return result;
     },
     onSuccess: () => {
@@ -337,7 +341,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
             <CardTitle className="text-2xl font-display text-stellar-white">
               {generatedChart.name}'s {generatedChart.chartType}
             </CardTitle>
-            <Button 
+            <Button
               onClick={() => setGeneratedChart(null)}
               variant="outline"
               className="w-fit border-cosmic-gold/20 text-cosmic-gold hover:bg-cosmic-gold/10"
@@ -361,41 +365,49 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-3">Planetary Positions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {generatedChart.planets.map((planet: any, index: number) => (
-                  <div key={index} className="bg-cosmic-purple/20 p-3 rounded-lg">
-                    <div className="font-medium text-stellar-white">{planet.name}</div>
-                    <div className="text-sm text-nebula-gray">
-                      {planet.sign} {planet.degree}° - House {planet.house}
-                    </div>
-                  </div>
-                ))}
+            {/* Professional KP Tables - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <KPCuspTable cusps={generatedChart.houses || []} />
+              </div>
+              <div>
+                <KPChartTable
+                  planets={generatedChart.planets || []}
+                  personName={generatedChart.name}
+                  chartType="Planetary Positions"
+                />
               </div>
             </div>
 
-            {/* Chart Display */}
-            <div className="bg-white/90 p-4 rounded-lg">
-              <div className="text-center py-8 text-gray-500">
-                Chart display temporarily disabled
+            {/* Rasi and Navamsa Charts */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
+              <div className="w-full max-w-sm">
+                <h3 className="text-center font-bold text-stellar-white mb-2">Rasi (D1)</h3>
+                <SouthIndianChart
+                  planets={generatedChart.planets || []}
+                  houses={generatedChart.houses || []}
+                  chartType="Rasi"
+                  title="Rasi Chart"
+                />
+              </div>
+              <div className="w-full max-w-sm">
+                <h3 className="text-center font-bold text-stellar-white mb-2">Navamsa (D9)</h3>
+                <SouthIndianChart
+                  planets={generatedChart.planets || []}
+                  chartType="Navamsa"
+                  title="Navamsa Chart"
+                />
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-cosmic-gold mb-3">House Information</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {generatedChart.houses.slice(0, 6).map((house: any, index: number) => (
-                  <div key={index} className="bg-cosmic-purple/20 p-2 rounded-lg text-center">
-                    <div className="font-medium text-stellar-white">House {house.number}</div>
-                    <div className="text-xs text-nebula-gray">{house.sign}</div>
-                    <div className="text-xs text-cosmic-gold">Lord: {house.lord}</div>
-                  </div>
-                ))}
-              </div>
+
+
+            {/* Dasa Bhukti Display */}
+            <div className="mt-8">
+              <DasaDisplay dasa={generatedChart.dasa} />
             </div>
 
-            <div className="bg-cosmic-purple/20 p-4 rounded-lg">
+            <div className="bg-cosmic-purple/20 p-4 rounded-lg mt-4">
               <h3 className="text-lg font-semibold text-cosmic-gold mb-2">KP Analysis</h3>
               <p className="text-stellar-white text-sm">{generatedChart.kpSystem.analysis}</p>
               <div className="mt-2">
@@ -404,11 +416,11 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
               </div>
             </div>
           </CardContent>
-          
+
           {/* Action Buttons */}
           <div className="px-6 pb-6">
             <div className="flex gap-4">
-              <Button 
+              <Button
                 onClick={() => {
                   setGeneratedChart(null);
                   setRenderKey(prev => prev + 1);
@@ -417,8 +429,8 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
               >
                 Generate Another Chart
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={handleSave}
                 disabled={saveChartMutation.isPending}
                 className="bg-cosmic-gold text-cosmic-midnight hover:bg-cosmic-gold/80"
@@ -428,7 +440,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
             </div>
           </div>
         </Card>
-      </div>
+      </div >
     );
   }
 
@@ -496,7 +508,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
               }}
               onFocus={() => form.getValues('birthPlace').length >= 3 && setShowSuggestions(true)}
             />
-            
+
             {/* Location Suggestions Dropdown */}
             {showSuggestions && locationSuggestions.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -515,13 +527,13 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
                 ))}
               </div>
             )}
-            
+
             {isLoadingLocation && (
               <div className="absolute right-3 top-8 text-cosmic-gold">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cosmic-gold"></div>
               </div>
             )}
-            
+
             {form.formState.errors.birthPlace && (
               <p className="text-red-400 text-sm mt-1">{form.formState.errors.birthPlace.message}</p>
             )}
@@ -556,8 +568,8 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
 
 
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={generateHoroscopeMutation.isPending}
             className="w-full bg-cosmic-gold text-cosmic-midnight hover:bg-cosmic-gold/90 disabled:opacity-50"
           >
@@ -578,7 +590,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-stellar-white">Generated Chart</h3>
             <div className="flex gap-3">
-              <Button 
+              <Button
                 onClick={() => {
                   console.log("Generate Another Chart clicked");
                   setGeneratedChart(null);
@@ -589,7 +601,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
               >
                 Generate Another Chart
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   console.log("Save button clicked!");
                   console.log("Generated chart exists:", !!generatedChart);
@@ -615,9 +627,9 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
                 {generatedChart.birthPlace}
               </p>
             </div>
-            
+
             <div className="text-center">
-              <Button 
+              <Button
                 onClick={() => setShowKPModal(true)}
                 className="bg-cosmic-purple text-stellar-white hover:bg-cosmic-purple/80 px-8 py-3"
               >
@@ -635,7 +647,7 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
 
       {/* KP Chart Detail Modal */}
       {showKPModal && generatedChart && (
-        <KPChartDetail 
+        <KPChartDetail
           horoscope={generatedChart}
           onClose={() => setShowKPModal(false)}
         />
