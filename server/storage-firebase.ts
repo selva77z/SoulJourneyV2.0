@@ -24,12 +24,14 @@ export class FirebaseStorage implements IStorage {
 
     constructor() {
         // Attempt to initialize Firebase Admin
+        const adminSdk = (admin as any).default || admin;
+        const firebaseApps = adminSdk.apps;
         try {
-            if (!admin.apps.length) {
+            if (!firebaseApps?.length) {
                 if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
                     console.log("Initializing Firebase from Environment Variables...");
-                    admin.initializeApp({
-                        credential: admin.credential.cert({
+                    adminSdk.initializeApp({
+                        credential: adminSdk.credential.cert({
                             projectId: process.env.FIREBASE_PROJECT_ID,
                             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
                             privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
@@ -37,10 +39,10 @@ export class FirebaseStorage implements IStorage {
                     });
                 } else {
                     console.log("Initializing Firebase from Default Credentials...");
-                    admin.initializeApp();
+                    adminSdk.initializeApp();
                 }
             }
-            this.db = admin.firestore();
+            this.db = adminSdk.firestore();
             this.initialized = true;
             console.log("Firebase Admin initialized successfully");
         } catch (error) {
