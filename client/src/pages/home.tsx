@@ -43,7 +43,7 @@ export default function Home() {
         {/* Simple Welcome */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-2 text-stellar-white">
-            Welcome, {user?.firstName || "Explorer"}!
+            Welcome, {user?.firstName || "Explorer"}! (Firebase Integrated)
           </h1>
           <p className="text-lg text-nebula-gray">
             Professional KP astrology with authentic calculations
