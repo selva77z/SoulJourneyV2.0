@@ -1,10 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/lib/firebase";
 
 export default function Navigation() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
+  const { logout } = useAuthStore();
 
   const navItems = [
     { href: "/", label: "Home", icon: "fas fa-home" },
@@ -36,11 +38,10 @@ export default function Navigation() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                location === item.href
-                  ? 'bg-cosmic-gold text-cosmic-midnight font-medium'
-                  : 'text-nebula-gray hover:text-stellar-white hover:bg-cosmic-midnight/40'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${location === item.href
+                ? 'bg-cosmic-gold text-cosmic-midnight font-medium'
+                : 'text-nebula-gray hover:text-stellar-white hover:bg-cosmic-midnight/40'
+                }`}
             >
               <i className={item.icon}></i>
               <span>{item.label}</span>
@@ -66,12 +67,15 @@ export default function Navigation() {
               {user?.firstName || 'User'}
             </span>
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
             className="text-nebula-gray hover:text-stellar-white"
-            onClick={() => window.location.href = "/api/logout"}
+            onClick={async () => {
+              await logout();
+              setLocation("/auth");
+            }}
           >
             <i className="fas fa-sign-out-alt mr-2"></i>
             <span className="hidden md:inline">Logout</span>
@@ -97,11 +101,10 @@ export default function Navigation() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                location === item.href
-                  ? 'bg-cosmic-gold text-cosmic-midnight font-medium'
-                  : 'text-nebula-gray hover:text-stellar-white hover:bg-cosmic-midnight/40'
-              }`}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${location === item.href
+                ? 'bg-cosmic-gold text-cosmic-midnight font-medium'
+                : 'text-nebula-gray hover:text-stellar-white hover:bg-cosmic-midnight/40'
+                }`}
             >
               <i className={item.icon}></i>
               <span>{item.label}</span>
