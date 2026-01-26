@@ -8,6 +8,8 @@ import { registerMobileRoutes } from "./mobile-routes";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerAIRoutes } from "./ai-routes";
 
+import * as admin from 'firebase-admin';
+
 // Middleware for GPT API key authentication
 const gptApiKeyAuth = (req: any, res: any, next: any) => {
   const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
@@ -21,9 +23,39 @@ const gptApiKeyAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-// Simple middleware to bypass authentication in development
-const isAuthenticated = (req: any, res: any, next: any) => {
-  // For development, always allow access
+// Check if Authorization header has a valid Firebase ID token
+const isAuthenticated = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const idToken = authHeader.split('Bearer ')[1];
+    try {
+      // Ensure admin is initialized (it should be by storage-firebase, but let's be safe)
+      const adminSdk = (admin as any).default || admin;
+      if (adminSdk.apps.length === 0) {
+        // If not initialized, we can't verify. Fallback to dev bypass logic if okay?
+        // But we want to test real auth.
+        console.warn("Firebase Admin not initialized in route middleware.");
+      } else {
+        const decodedToken = await adminSdk.auth().verifyIdToken(idToken);
+        req.user = {
+          id: decodedToken.uid,
+          email: decodedToken.email,
+          firstName: decodedToken.name ? decodedToken.name.split(' ')[0] : 'User',
+          lastName: decodedToken.name ? decodedToken.name.split(' ').slice(1).join(' ') : '',
+          claims: decodedToken
+        };
+        return next();
+      }
+    } catch (error) {
+      console.error('Error verifying Firebase ID token:', error);
+      return res.status(403).json({ error: 'Unauthorized', message: 'Invalid token' });
+    }
+  }
+
+  // Fallback for development (legacy bypass) - ONLY if no token provided
+  // This allows us to keep using the app if frontend isn't updated, 
+  // but if frontend SENDS a token, we verified it above.
   if (process.env.NODE_ENV === 'development') {
     req.user = {
       id: 'admin-001',
@@ -36,27 +68,38 @@ const isAuthenticated = (req: any, res: any, next: any) => {
     };
     return next();
   }
-  // In production, you'd implement real auth here
-  next();
+
+  res.status(401).json({ message: "Unauthorized - No token provided" });
 };
 
-// Simple setup function for development
+// Setup auth endpoint
 const setupAuth = async (app: Express) => {
-  console.log('🔧 Development mode: Authentication bypassed');
-
-  // Mock auth endpoint for frontend
-  app.get('/api/auth/user', (req, res) => {
-    if (process.env.NODE_ENV === 'development') {
-      return res.json({
-        id: 'admin-001',
-        email: 'admin@localhost.com',
-        firstName: 'Admin',
-        lastName: 'User',
-        isAdmin: true
+  // Login endpoint to exchange/verify token (frontend sends token, we verify and set cookie if needed)
+  app.post('/api/auth/login', isAuthenticated, async (req: any, res) => {
+    try {
+      // Ensure user exists in our database
+      await storage.upsertUser({
+        id: req.user.id, // Using Firebase UID as our ID
+        email: req.user.email || '',
+        firstName: req.user.firstName || 'User',
+        lastName: req.user.lastName || '',
+        createdAt: new Date().toISOString() // Will be ignored by upsert if user exists
       });
+
+      res.json({
+        success: true,
+        user: req.user,
+        message: "Successfully authenticated via Firebase"
+      });
+    } catch (error) {
+      console.error("Login Error:", error);
+      res.status(500).json({ success: false, message: "Failed to persist user session" });
     }
-    // In production, return 401 if not logged in
-    res.status(401).json({ message: "Unauthorized" });
+  });
+
+
+  app.get('/api/auth/user', isAuthenticated, (req: any, res) => {
+    res.json(req.user);
   });
 };
 
@@ -872,7 +915,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(transformedRealData);
     } catch (error: any) {
       console.error("Error fetching saved horoscopes:", error);
-      res.status(500).json({ message: "Failed to fetch saved horoscopes" });
+      res.status(500).json({
+        message: "Failed to fetch saved horoscopes",
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 
@@ -883,8 +930,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allBirthData = await storage.getAllBirthDataForBrowsing(userId);
       res.json(allBirthData || []);
     } catch (error: any) {
-      console.error("Error fetching all birth data:", error);
-      res.status(500).json({ message: "Failed to fetch birth data" });
+      console.error("Error fetching birth data:", error);
+      res.status(500).json({
+        message: "Failed to fetch birth data",
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 

@@ -209,12 +209,9 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          description: "You are logged out. Please log in again.",
           variant: "destructive",
         });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
         return;
       }
       toast({
@@ -262,12 +259,9 @@ export default function SimpleHoroscopeForm({ initialData }: SimpleHoroscopeForm
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          description: "You are logged out. Please log in again.",
           variant: "destructive",
         });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
         return;
       }
       toast({

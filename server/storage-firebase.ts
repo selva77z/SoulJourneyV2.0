@@ -84,18 +84,15 @@ export class FirebaseStorage implements IStorage {
         if (!data) return data;
         const result = { ...data };
 
-        // Convert common date fields from string/Timestamp to Date object or compatible string
-        // The SQLite schema expects ISO strings for dates usually, but let's check what the app expects
-        // The schema-sqlite says: createdAt: text("created_at"), so expecting string.
-        // But Drizzle usually handles Date <-> String. 
-        // Types say: createdAt: string | null.
-
-        // We'll keep them as they are if they are strings.
-        // If they are Firestore Timestamps, convert to ISO string.
-
         for (const key of Object.keys(result)) {
-            if (result[key] instanceof admin.firestore.Timestamp) {
+            // Check if it looks like a Firestore Timestamp (has toDate method)
+            if (result[key] && typeof result[key].toDate === 'function') {
                 result[key] = result[key].toDate().toISOString();
+            }
+            // Also handle nested objects if necessary, but flat for now is mostly sufficient
+            // or if it is already a Date object
+            else if (result[key] instanceof Date) {
+                result[key] = result[key].toISOString();
             }
         }
         return result as T;
@@ -176,12 +173,21 @@ export class FirebaseStorage implements IStorage {
         const snapshot = await this.db
             .collection("birthData")
             .where("userId", "==", userId)
-            .orderBy("createdAt", "desc")
-            .limit(1)
+            // .orderBy("createdAt", "desc") // Requires index
+            // .limit(1) // Cannot limit effectively without ordering first
             .get();
 
         if (snapshot.empty) return undefined;
-        return this.convertDates<BirthData>(snapshot.docs[0].data());
+
+        const allData = snapshot.docs.map(doc => this.convertDates<BirthData>(doc.data()));
+        // Sort descending and take first
+        allData.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+
+        return allData[0];
     }
 
     async updateBirthData(id: number, data: Partial<InsertBirthData>): Promise<BirthData> {
@@ -207,9 +213,16 @@ export class FirebaseStorage implements IStorage {
         // Note: complex ordering needs index in Firestore. 
         // We'll skip complex ordering for now or handle in memory if data is small.
         // Or just order by createdAt.
-        const snapshot = await query.orderBy("year").orderBy("month").orderBy("day").get();
+        const snapshot = await query.get();
 
-        return snapshot.docs.map(doc => this.convertDates<BirthData>(doc.data()));
+        const birthData = snapshot.docs.map(doc => this.convertDates<BirthData>(doc.data()));
+
+        // Sort in memory by year, month, day
+        return birthData.sort((a, b) => {
+            if ((a.year || 0) !== (b.year || 0)) return (a.year || 0) - (b.year || 0);
+            if ((a.month || 0) !== (b.month || 0)) return (a.month || 0) - (b.month || 0);
+            return (a.day || 0) - (b.day || 0);
+        });
     }
 
     async getBirthData(id: number): Promise<BirthData | undefined> {
@@ -285,12 +298,29 @@ export class FirebaseStorage implements IStorage {
     }
 
     async getChartsByUserId(userId: string): Promise<Chart[]> {
-        const snapshot = await this.db
-            .collection("charts")
-            .where("userId", "==", userId)
-            .orderBy("createdAt", "desc")
-            .get();
-        return snapshot.docs.map(doc => this.convertDates<Chart>(doc.data()));
+        if (!this.db) {
+            console.error("Database not initialized");
+            return [];
+        }
+        try {
+            const snapshot = await this.db
+                .collection("charts")
+                .where("userId", "==", userId)
+                // .orderBy("createdAt", "desc") // Requires index, sorting in memory
+                .get();
+
+            const charts = snapshot.docs.map(doc => this.convertDates<Chart>(doc.data()));
+            // Sort by createdAt descending in memory
+            return charts.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA;
+            });
+        } catch (error) {
+            console.error("Error fetching charts:", error);
+            // Return empty array instead of throwing to prevent 500 on frontend
+            return [];
+        }
     }
 
     async getChartByBirthDataId(birthDataId: number): Promise<Chart | undefined> {

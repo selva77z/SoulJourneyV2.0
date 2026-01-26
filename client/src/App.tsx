@@ -14,6 +14,7 @@ import Matches from "@/pages/matches";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import Navigation from "@/components/navigation";
+import AuthPage from "@/pages/auth-page";
 
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
       {!isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/auth" component={AuthPage} />
           <Route component={NotFound} />
         </>
       ) : (
