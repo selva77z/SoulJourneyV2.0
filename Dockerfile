@@ -1,9 +1,15 @@
 # Build Stage
-FROM node:20-alpine AS builder
+FROM node:20-bullseye-slim AS builder
 
 WORKDIR /app
 
-# Install dependencies (including devDependencies for build)
+# Install Python dependencies for any build scripts that might need them (optional but safe)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node dependencies
 COPY package*.json ./
 RUN npm ci
 
@@ -14,25 +20,39 @@ COPY . .
 RUN npm run build
 
 # Production Stage
-FROM node:20-alpine AS runner
+FROM node:20-bullseye-slim AS runner
 
 WORKDIR /app
 
-# Install only production dependencies
+# Install Python and dependencies
+# numpy/pandas/pyswisseph often require build tools
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages required by the app
+# (Derived from pyproject.toml)
+RUN pip3 install --no-cache-dir pyswisseph ephem pandas numpy
+
+# Install only production Node dependencies
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy built assets from builder
 COPY --from=builder /app/dist ./dist
-# Copy internal server files/scripts if needed (e.g., Python scripts for Swiss Eph if used directly via shell)
-# Note: standard swisseph-v2 is a node module, so it's in node_modules
-COPY --from=builder /app/server/swiss_chart_generator_kp.py ./server/
+
+# Copy ALL python scripts from server directory
+# This ensures helper scripts like find_ayanamsa_zero.py are also present
+COPY --from=builder /app/server/*.py ./server/
 
 # Environment setup
 ENV NODE_ENV=production
 ENV PORT=5000
 
-# Create volume mount point for SQLite database and artifacts
+# Create volume mount point for data/artifacts
 VOLUME ["/app/data"]
 
 # Expose port
