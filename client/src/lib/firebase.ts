@@ -4,10 +4,11 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, type User } from
 import { create } from "zustand";
 import { queryClient } from "./queryClient";
 
-// TODO: Replace with your actual client-side Firebase config
-// You can find this in Firebase Console -> Project Settings -> General -> Your apps -> Web app
+// TODO: PASTE YOUR FIREBASE WEB CONFIG HERE
+// Go to Firebase Console -> Project Settings -> General -> Your apps -> Web app -> SDK Setup/Config
+// Copy the object properties:
 const firebaseConfig = {
-    apiKey: "AIzaSyBBh5OtfakenF0dprezu5OFWbMme-UESE8",
+    apiKey: "AIzaSyBBh5OtfakenF0dprezu5OFWbMme-UESE8", // Replace with yours
     authDomain: "lifejourney-fb0f7.firebaseapp.com",
     projectId: "lifejourney-fb0f7",
     storageBucket: "lifejourney-fb0f7.firebasestorage.app",
