@@ -93,10 +93,22 @@ function getFullKPChain(nakDeg) {
 }
 
 // Calculate Date object from birth data
+// Accepts birthDate as either ISO "YYYY-MM-DD" (from <input type="date">) or "DD/MM/YYYY"
 function calculateDateTime(birthDate, birthTime, timezoneOffset = 5.5) {
-  const [day, month, year] = birthDate.split('/').map(Number);
+  let day, month, year;
+  if (birthDate.includes('-')) {
+    // ISO format YYYY-MM-DD
+    [year, month, day] = birthDate.split('-').map(Number);
+  } else {
+    // DD/MM/YYYY
+    [day, month, year] = birthDate.split('/').map(Number);
+  }
   const [hours, minutes, seconds = 0] = birthTime.split(':').map(Number);
-  
+
+  if ([day, month, year, hours, minutes].some(Number.isNaN)) {
+    throw new Error(`Invalid birth date/time: "${birthDate}" "${birthTime}"`);
+  }
+
   // Create local time
   const localTime = new Date(year, month - 1, day, hours, minutes, seconds);
   
@@ -255,7 +267,7 @@ function calculateKPPlanets(birthDate, birthTime, location) {
       const seconds = Math.floor(((degreesInSign % 1) * 60 % 1) * 60);
       
       // Calculate nakshatra
-      const nakIndex = Math.floor(siderealLon / NAK_LENGTH);
+      const nakIndex = Math.min(Math.max(Math.floor(siderealLon / NAK_LENGTH), 0), NAKSHATRAS.length - 1);
       const [nakshatra, starLord] = NAKSHATRAS[nakIndex];
       const nakDeg = siderealLon % NAK_LENGTH;
       const pada = Math.floor(nakDeg / (NAK_LENGTH / 4)) + 1;
