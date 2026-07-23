@@ -30,3 +30,7 @@ sqlite.db-journal
 # Artifacts
 .gemini
 serviceAccountKey.json
+
+# Python bytecode cache
+__pycache__/
+*.pyc
