@@ -229,16 +229,15 @@ function calculateKPPlanets(birthDate, birthTime, location) {
       
       try {
         if (planetName === "Rahu") {
-          // Calculate lunar node (Rahu) using Moon position approximation
-          const moonBody = astronomy.Body.Moon;
-          const moonPos = astronomy.EclipticLongitude(moonBody, dateTime);
-          // Simplified lunar node calculation - approximate for now
-          longitude = (moonPos + 180) % 360; // Simplified calculation
+          // Rahu = mean lunar ascending node (KP standard uses the mean node)
+          const jd = calculateJulianDay(dateTime);
+          const T = (jd - 2451545.0) / 36525;
+          longitude = (calculateRahuLongitude(T) + 360) % 360;
         } else if (planetName === "Ketu") {
-          // Ketu is 180° opposite to Rahu
-          const moonBody = astronomy.Body.Moon;
-          const moonPos = astronomy.EclipticLongitude(moonBody, dateTime);
-          longitude = moonPos % 360; // Simplified calculation
+          // Ketu is 180° opposite to Rahu (mean node)
+          const jd = calculateJulianDay(dateTime);
+          const T = (jd - 2451545.0) / 36525;
+          longitude = (calculateRahuLongitude(T) + 180 + 360) % 360;
         } else {
           // Get ecliptic longitude for other planets
           const bodyEnum = astronomy.Body[planetName];
