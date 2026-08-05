@@ -53,10 +53,11 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     }
   }
 
-  // Fallback for development (legacy bypass) - ONLY if no token provided
-  // This allows us to keep using the app if frontend isn't updated, 
-  // but if frontend SENDS a token, we verified it above.
-  /*
+  // Development-only bypass: when running `npm run dev` (NODE_ENV=development)
+  // and no Firebase token is present, sign in as a local demo user so the full
+  // UI is usable locally without a Firebase project. This branch is skipped in
+  // production (`npm start`, NODE_ENV=production), where a valid token above is
+  // required.
   if (process.env.NODE_ENV === 'development') {
     req.user = {
       id: 'admin-001',
@@ -69,7 +70,6 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     };
     return next();
   }
-  */
 
   res.status(401).json({ message: "Unauthorized - No token provided" });
 };
