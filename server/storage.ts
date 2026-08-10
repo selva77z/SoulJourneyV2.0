@@ -348,9 +348,23 @@ export class DatabaseStorage implements IStorage {
 
 import { FirebaseStorage } from "./storage-firebase";
 
-// ... [Keep DatabaseStorage implementation if needed, or just comment it out]
-// We will look at replacing the specific export line.
+// Choose the data layer based on whether Firebase credentials are available.
+// Locally (no credentials) we use the SQLite-backed DatabaseStorage so the app
+// runs with no external setup. When Firebase credentials are provided — either
+// FIREBASE_* env vars or Google Application Default Credentials
+// (GOOGLE_APPLICATION_CREDENTIALS / cloud metadata) — we use Firestore.
+const hasFirebaseCreds =
+  (!!process.env.FIREBASE_PROJECT_ID &&
+    !!process.env.FIREBASE_CLIENT_EMAIL &&
+    !!process.env.FIREBASE_PRIVATE_KEY) ||
+  !!process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+  !!process.env.USE_FIREBASE;
 
-// export const storage = new DatabaseStorage();
-export const storage = new FirebaseStorage();
+export const storage: IStorage = hasFirebaseCreds
+  ? new FirebaseStorage()
+  : new DatabaseStorage();
+
+console.log(
+  `[storage] Using ${hasFirebaseCreds ? "Firebase/Firestore" : "SQLite (local.db)"} data layer`
+);
 

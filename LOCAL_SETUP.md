@@ -30,7 +30,11 @@ demo user, so **no Firebase / Google login is required** to use the full UI
 
 - **Database:** uses a local SQLite file (`local.db`) that ships with the repo —
   no PostgreSQL needed. (The older `setup-mac.sh` mentions Postgres; that is
-  outdated.)
+  outdated.) The app automatically uses SQLite when no Firebase credentials are
+  present, so it runs locally with zero external services. It switches to
+  Firebase/Firestore only when `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` /
+  `FIREBASE_PRIVATE_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`, or `USE_FIREBASE` are
+  set.
 - **Port:** the server serves both the API and the client on **port 5000**.
   Override with `PORT=3000 npm run dev` if 5000 is taken.
 - **Auth in production:** when built and run with `npm start`
