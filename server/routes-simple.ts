@@ -53,12 +53,12 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     }
   }
 
-  // Development-only bypass: when running `npm run dev` (NODE_ENV=development)
-  // and no Firebase token is present, sign in as a local demo user so the full
-  // UI is usable locally without a Firebase project. This branch is skipped in
-  // production (`npm start`, NODE_ENV=production), where a valid token above is
-  // required.
-  if (process.env.NODE_ENV === 'development') {
+  // Demo / local bypass: sign in as a demo user (no Firebase project needed)
+  // when either running in development (`npm run dev`, NODE_ENV=development) or
+  // DEMO_MODE=true is set. DEMO_MODE lets a public deployment run as a usable
+  // no-login demo. A normal production deployment (DEMO_MODE unset) still
+  // requires a valid Firebase token verified above.
+  if (process.env.NODE_ENV === 'development' || process.env.DEMO_MODE === 'true') {
     req.user = {
       id: 'admin-001',
       email: 'admin@localhost.com',

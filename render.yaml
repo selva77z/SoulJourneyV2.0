@@ -1,0 +1,20 @@
+# Render Blueprint for SoulJourney (KP Astrology)
+# One-click deploy: in the Render dashboard choose "New +" -> "Blueprint",
+# connect this repo and branch, and Render reads this file automatically.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: souljourney-kp
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    branch: claude/kp-astrology-app-d8zap8
+    autoDeploy: true
+    envVars:
+      # Run as a public, no-login demo using the bundled SQLite database,
+      # so no Firebase project or credentials are required to view the app.
+      - key: DEMO_MODE
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      # Render provides PORT automatically; the app reads process.env.PORT.
