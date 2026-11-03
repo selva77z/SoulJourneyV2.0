@@ -25,13 +25,13 @@ export default function Landing() {
             <Button 
               variant="ghost" 
               className="text-stellar-white hover:text-cosmic-gold"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/auth"}
             >
               Sign In
             </Button>
             <Button 
               className="bg-cosmic-gradient text-stellar-white hover:opacity-90"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/auth"}
             >
               Get Started
             </Button>
@@ -57,7 +57,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-cosmic-gold text-cosmic-midnight hover:bg-opacity-90 text-lg px-8 py-4"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => window.location.href = "/auth"}
               >
                 <i className="fas fa-chart-line mr-2"></i>
                 Generate KP Chart
@@ -232,7 +232,7 @@ export default function Landing() {
             <Button 
               size="lg" 
               className="bg-cosmic-gold text-cosmic-midnight hover:bg-opacity-90 text-lg px-8 py-4"
-              onClick={() => window.location.href = "/api/login"}
+              onClick={() => window.location.href = "/auth"}
             >
               <i className="fas fa-rocket mr-2"></i>
               Start Your Journey

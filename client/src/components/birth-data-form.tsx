@@ -65,7 +65,7 @@ export default function BirthDataForm({ initialData }: BirthDataFormProps) {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/auth";
         }, 500);
         return;
       }
