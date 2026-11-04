@@ -34,26 +34,25 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/auth" component={AuthPage} />
-          <Route component={NotFound} />
-        </>
-      ) : (
-        <>
-          <Navigation />
-          <Route path="/" component={Home} />
-          <Route path="/horoscopes" component={Horoscopes} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/chart-details" component={ChartDetailsPage} />
-          <Route path="/matches" component={Matches} />
-          <Route path="/admin" component={Admin} />
-          <Route component={NotFound} />
-        </>
-      )}
-    </Switch>
+    <>
+      {isAuthenticated && <Navigation />}
+      <Switch>
+        {!isAuthenticated
+          ? [
+              <Route key="landing" path="/" component={Landing} />,
+              <Route key="auth" path="/auth" component={AuthPage} />,
+            ]
+          : [
+              <Route key="home" path="/" component={Home} />,
+              <Route key="horoscopes" path="/horoscopes" component={Horoscopes} />,
+              <Route key="profile" path="/profile" component={Profile} />,
+              <Route key="chart-details" path="/chart-details" component={ChartDetailsPage} />,
+              <Route key="matches" path="/matches" component={Matches} />,
+              <Route key="admin" path="/admin" component={Admin} />,
+            ]}
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

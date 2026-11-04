@@ -1,0 +1,49 @@
+name: Deploy KP site to GitHub Pages
+
+# Auto-publish: every push that touches the static site (or this workflow)
+# rebuilds and redeploys the live GitHub Pages site. No external account needed.
+on:
+  push:
+    branches:
+      - main
+      - claude/kp-astrology-app-d8zap8
+    paths:
+      - "site/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch: {}   # lets you trigger a publish by hand from the Actions tab
+
+# Permissions the Pages deploy needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one publish at a time; a newer push supersedes an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        # Reads the repo's Pages config. Pages must be enabled once by hand:
+        # Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+        # (The default workflow token cannot enable Pages itself.)
+        uses: actions/configure-pages@v5
+
+      - name: Upload the static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

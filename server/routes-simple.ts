@@ -53,11 +53,12 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     }
   }
 
-  // Fallback for development (legacy bypass) - ONLY if no token provided
-  // This allows us to keep using the app if frontend isn't updated, 
-  // but if frontend SENDS a token, we verified it above.
-  /*
-  if (process.env.NODE_ENV === 'development') {
+  // Demo / local bypass: sign in as a demo user (no Firebase project needed)
+  // when either running in development (`npm run dev`, NODE_ENV=development) or
+  // DEMO_MODE=true is set. DEMO_MODE lets a public deployment run as a usable
+  // no-login demo. A normal production deployment (DEMO_MODE unset) still
+  // requires a valid Firebase token verified above.
+  if (process.env.NODE_ENV === 'development' || process.env.DEMO_MODE === 'true') {
     req.user = {
       id: 'admin-001',
       email: 'admin@localhost.com',
@@ -69,7 +70,6 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     };
     return next();
   }
-  */
 
   res.status(401).json({ message: "Unauthorized - No token provided" });
 };
@@ -235,15 +235,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find ascendant (Lagna) - for now using first planet's sign as approximation
       const lagna = realPlanets.length > 0 ? `${realPlanets[0].sign} ${realPlanets[0].degree}` : "Unknown";
-      // ...existing code...
-
-      if (!chartData || !chartData.planets || !Array.isArray(chartData.planets)) {
-        console.error("Failed to calculate planetary positions for GPT request");
-        return res.status(500).json({
-          error: "Failed to calculate planetary positions",
-          message: "Swiss Ephemeris calculation failed"
-        });
-      }
 
       // Create the chart object
       const chart = {
@@ -265,81 +256,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           features: ["Star Lord", "Sub Lord", "Sub-Sub Lord", "Nakshatra Pada"]
         }
       };
-      const allCharts = await storage.getChartsByUserId ? await storage.getChartsByUserId('admin-001') : [];
-
-      let foundChart = null;
-
-      if (id) {
-        // Search by ID
-        foundChart = allCharts.find((chart: any) => chart.id == id);
-      } else if (name) {
-        // Search by name (case insensitive)
-        const searchName = typeof name === 'string' ? name : String(name);
-        foundChart = allCharts.find((chart: any) => {
-          const chartData = typeof chart.chartData === 'string' ? JSON.parse(chart.chartData) : chart.chartData;
-          return chartData.name && chartData.name.toLowerCase().includes(searchName.toLowerCase());
-        });
-      } else {
-        // Return all charts if no search criteria
-        const allChartsFormatted = allCharts.map((chart: any) => {
-          const chartData = typeof chart.chartData === 'string' ? JSON.parse(chart.chartData) : chart.chartData;
-          return {
-            id: chart.id,
-            name: chartData.name,
-            birthDate: chartData.birthDate,
-            birthTime: chartData.birthTime,
-            birthPlace: chartData.birthPlace,
-            generated: chartData.generated,
-            planetsCount: chartData.planets ? chartData.planets.length : 0
-          };
-        });
-
-        return res.json({
-          success: true,
-          message: `Found ${allChartsFormatted.length} saved charts`,
-          charts: allChartsFormatted
-        });
-      }
-
-      if (!foundChart) {
-        return res.json({
-          success: false,
-          message: name ? `No chart found for name: ${name}` : `No chart found for ID: ${id}`,
-          charts: []
-        });
-      }
-
-      // Parse and return the found chart
-      const chartData = typeof foundChart.chartData === 'string' ? JSON.parse(foundChart.chartData) : foundChart.chartData;
 
       return res.json({
         success: true,
-        message: `Chart found for ${chartData.name}`,
-        chart: {
-          id: foundChart.id,
-          name: chartData.name,
-          birthDate: chartData.birthDate,
-          birthTime: chartData.birthTime,
-          birthPlace: chartData.birthPlace,
-          latitude: chartData.latitude,
-          longitude: chartData.longitude,
-          generated: chartData.generated,
-          chartType: chartData.chartType,
-          planets: chartData.planets,
-          houses: chartData.houses,
-          kpSystem: chartData.kpSystem,
-          planetsCount: chartData.planets ? chartData.planets.length : 0,
-          calculation: "Swiss Ephemeris with KP-Newcomb Ayanamsa",
-          significators: "RAL, STL, SBL, SSL, SSSL included"
-        }
+        message: `KP horoscope generated for ${name}`,
+        chart,
+        planets: planetsFormatted,
+        planetsCount: planetsFormatted.length
       });
 
     } catch (error: any) {
-      console.error("GPT Query Error:", error);
+      console.error("Simple Horoscope Error:", error);
       res.setHeader('Content-Type', 'application/json');
       return res.status(500).json({
         success: false,
-        error: "Failed to query chart data",
+        error: "Failed to generate KP horoscope",
         details: error.message
       });
     }

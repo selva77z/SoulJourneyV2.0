@@ -52,7 +52,7 @@ NAKSHATRAS = [
 PLANET_IDS = {
     "Sun": swe.SUN, "Moon": swe.MOON, "Mercury": swe.MERCURY, "Venus": swe.VENUS,
     "Mars": swe.MARS, "Jupiter": swe.JUPITER, "Saturn": swe.SATURN,
-    "Rahu": swe.TRUE_NODE, "Ketu": swe.TRUE_NODE # Ketu handled separately
+    "Rahu": swe.MEAN_NODE, "Ketu": swe.MEAN_NODE # KP uses the Mean lunar node; Ketu handled separately
 }
 
 def to_dms_str(deg):
@@ -468,7 +468,7 @@ def calculate_kp_chart(birth_date, birth_time, latitude, longitude, place_name):
         if p_name == "Ketu":
             # Ketu is opposite Rahu
             # calc_ut(tjdut, ipl, flag) -> result
-            rahu_data = swe.calc_ut(jd, swe.TRUE_NODE, swe.FLG_SIDEREAL)[0]
+            rahu_data = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SIDEREAL)[0]
             lon = (rahu_data[0] + 180) % 360
         else:
             p_data = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)[0]

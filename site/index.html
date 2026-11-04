@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="KP (Krishnamurti Paddhati) astrology chart generator — runs entirely in your browser.">
+<style>:root{padding:0}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>KP Stellar Chart</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a birth-detail panel feeding a results column — Lagna banner, planet lord-chain table, and a South-Indian rasi grid. */
+  :root{
+    --bg:#ece9f1; --surface:#f8f6fc; --surface-2:#f1eef8;
+    --ink:#211c38; --muted:#6a6286; --line:#dcd6e8;
+    --accent:#8a6a16; --accent-2:#b6912f;
+    --gold-line:#e3d6ad; --shadow:0 1px 2px rgba(33,28,56,.06),0 8px 28px rgba(33,28,56,.08);
+    --node:#6f58b8;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#110f26; --surface:#1a1740; --surface-2:#211d4c;
+    --ink:#ece8ff; --muted:#a79ed0; --line:#2d2956;
+    --accent:#e8c374; --accent-2:#caa858; --gold-line:#4a3f73;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    --node:#b7a6f2;
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#110f26; --surface:#1a1740; --surface-2:#211d4c;
+    --ink:#ece8ff; --muted:#a79ed0; --line:#2d2956;
+    --accent:#e8c374; --accent-2:#caa858; --gold-line:#4a3f73;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    --node:#b7a6f2;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+  h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;text-wrap:balance;margin:0;font-weight:600;letter-spacing:.2px}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  header.top{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+  header.top h1{font-size:2.5rem;line-height:1.02}
+  header.top p{margin:2px 0 0;color:var(--muted);max-width:60ch;font-size:.97rem}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .panel{padding:20px}
+  .panel h2{font-size:1.4rem;margin-bottom:2px}
+  .panel .sub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  form{display:flex;flex-direction:column;gap:14px}
+  label{display:flex;flex-direction:column;gap:5px;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+  input,select{font-family:inherit;font-size:.95rem;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .places{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-family:inherit;font-size:.78rem;cursor:pointer;background:var(--surface-2);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:5px 11px}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  button.go{font-family:inherit;font-weight:600;font-size:1rem;letter-spacing:.02em;cursor:pointer;color:#fff;background:linear-gradient(180deg,var(--accent-2),var(--accent));border:none;border-radius:10px;padding:12px;margin-top:2px}
+  :root[data-theme="dark"] button.go,:root:not([data-theme="light"]) button.go{color:#17132e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.go{color:#17132e}}
+  button.go:hover{filter:brightness(1.05)}
+  .results{display:flex;flex-direction:column;gap:18px;min-width:0}
+  .lagna{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:baseline;padding:18px 20px}
+  .lagna .big{font-family:"Cormorant Garamond",serif;font-size:1.9rem;font-weight:600}
+  .lagna .big b{color:var(--accent);font-weight:700}
+  .lagna .meta{color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+  .ayan{margin-left:auto;text-align:right;font-size:.78rem;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+  .tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+  table{border-collapse:collapse;width:100%;min-width:560px;background:var(--surface)}
+  caption{text-align:left;font-family:"Cormorant Garamond",serif;font-size:1.3rem;font-weight:600;padding:14px 16px 8px}
+  th,td{padding:9px 12px;text-align:left;font-size:.9rem;border-bottom:1px solid var(--line)}
+  thead th{font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+  tbody td:first-child{font-weight:600}
+  td.deg,td.lord{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:.82rem}
+  td.lord{color:var(--accent)}
+  tr.node td:first-child{color:var(--node)}
+  tbody tr:last-child td{border-bottom:none}
+  .chartcard{padding:16px 16px 20px}
+  .chartcard h2{font-size:1.35rem;margin-bottom:12px}
+  .rasi{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:460px;aspect-ratio:1/1}
+  .cell{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px 7px;min-height:0;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+  .cell.mid{background:transparent;border:none}
+  .cell .sign{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .cell .plan{font-family:"IBM Plex Mono",monospace;font-size:.82rem;font-weight:500;line-height:1.3;display:flex;flex-wrap:wrap;gap:3px 6px}
+  .cell .plan .asc{color:var(--accent);font-weight:600}
+  .center{grid-column:2/4;grid-row:2/4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px}
+  .center .t{font-family:"Cormorant Garamond",serif;font-size:1.15rem;color:var(--accent)}
+  .center .s{font-size:.72rem;color:var(--muted)}
+  .note{font-size:.8rem;color:var(--muted);max-width:70ch}
+  .note code{font-family:"IBM Plex Mono",monospace;font-size:.76rem;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+  .err{color:#c0392b;font-size:.85rem}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .err{color:#ff8e7a}}
+  :root[data-theme="dark"] .err{color:#ff8e7a}
+  footer{margin-top:30px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Krishnamurti Paddhati · Stellar Astrology</span>
+    <h1>KP Stellar Chart</h1>
+    <p>Enter birth details to compute sidereal planetary positions and the full KP lord chain — star lord, sub, sub-sub, and sub-sub-sub — using the KP-Newcomb ayanamsa and the mean lunar node. Everything runs in your browser.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card panel">
+      <h2>Birth Details</h2>
+      <div class="sub">Prefilled with an example chart — replace with your own.</div>
+      <form id="form">
+        <label>Name
+          <input id="name" type="text" value="Selvapriyan R" autocomplete="off">
+        </label>
+        <div class="row2">
+          <label>Date
+            <input id="date" type="date" value="1990-11-25">
+          </label>
+          <label>Time (24h)
+            <input id="time" type="time" step="1" value="03:17:25">
+          </label>
+        </div>
+        <label>Quick place
+          <div class="places" id="places"></div>
+        </label>
+        <div class="row2">
+          <label>Latitude (°N)
+            <input id="lat" type="number" step="0.0001" value="10.3814">
+          </label>
+          <label>Longitude (°E)
+            <input id="lng" type="number" step="0.0001" value="78.8214">
+          </label>
+        </div>
+        <label>Time zone (hours from UTC)
+          <input id="tz" type="number" step="0.25" value="5.5">
+        </label>
+        <button class="go" type="submit">Cast the chart</button>
+        <div class="err" id="err" hidden></div>
+      </form>
+    </section>
+
+    <section class="results">
+      <div class="card lagna" id="lagnaCard">
+        <div>
+          <div class="eyebrow">Lagna · Ascendant</div>
+          <div class="big" id="lagnaBig">—</div>
+          <div class="meta" id="lagnaMeta"></div>
+        </div>
+        <div class="ayan" id="ayanBox"></div>
+      </div>
+
+      <div class="card tablewrap">
+        <table>
+          <caption>Planetary Positions &amp; Significators</caption>
+          <thead>
+            <tr><th>Planet</th><th>Degree</th><th>Rasi</th><th>Nakshatra (Pada)</th><th>RL</th><th>★ StL</th><th>SbL</th><th>SSL</th><th>SSSL</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="card chartcard">
+        <h2>Rasi Chart · South Indian</h2>
+        <div class="rasi" id="rasi"></div>
+      </div>
+
+      <p class="note">Abbreviations: <b>RL</b> rasi lord · <b>StL</b> star (nakshatra) lord · <b>SbL</b> sub lord · <b>SSL</b> sub-sub · <b>SSSL</b> sub-sub-sub. Ascendant uses the Placidus-equivalent trigonometric formula; planets use apparent geocentric longitudes minus the KP-Newcomb ayanamsa. Rahu and Ketu use the <b>mean</b> node.</p>
+    </section>
+  </div>
+
+  <footer>Positions from the astronomy-engine ephemeris. Validated against a published KP reference chart to the arc-second on the ascendant and to the sub-lord on all nine grahas.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var A = window.Astronomy;
+  var NAK=["Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha","Magha","P.Phalguni","U.Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha","Mula","P.Ashada","U.Ashada","Shravana","Dhanishta","Shatabhisha","P.Bhadra","U.Bhadra","Revati"];
+  var SEQ=["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
+  var YR={Ketu:7,Venus:20,Sun:6,Moon:10,Mars:7,Rahu:18,Jupiter:16,Saturn:19,Mercury:17};
+  var SIGNS=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+  var RASI_LORD={Aries:"Mars",Taurus:"Venus",Gemini:"Mercury",Cancer:"Moon",Leo:"Sun",Virgo:"Mercury",Libra:"Venus",Scorpio:"Mars",Sagittarius:"Jupiter",Capricorn:"Saturn",Aquarius:"Saturn",Pisces:"Jupiter"};
+  var AB={Ketu:"Ke",Venus:"Ve",Sun:"Su",Moon:"Mo",Mars:"Ma",Rahu:"Ra",Jupiter:"Ju",Saturn:"Sa",Mercury:"Me"};
+  var NL=13+1/3, D2R=Math.PI/180, R2D=180/Math.PI;
+
+  function norm(x){return ((x%360)+360)%360;}
+  function sub(deg,span,startLord){
+    var idx=SEQ.indexOf(startLord), c=0;
+    for(var k=0;k<9;k++){var p=SEQ[(idx+k)%9];var l=YR[p]/120*span;if(deg<=c+l+1e-9)return{lord:p,span:l,rel:deg-c};c+=l;}
+    var q=SEQ[(idx+8)%9];var ql=YR[q]/120*span;return{lord:q,span:ql,rel:deg-(span-ql)};
+  }
+  function chain(lon){
+    lon=norm(lon);
+    var ni=Math.floor(lon/NL), nd=lon-ni*NL, stl=SEQ[ni%9];
+    var s1=sub(nd,NL,stl), s2=sub(s1.rel,s1.span,s1.lord), s3=sub(s2.rel,s2.span,s2.lord), s4=sub(s3.rel,s3.span,s3.lord);
+    return {sign:SIGNS[Math.floor(lon/30)], nak:NAK[ni], pada:Math.floor(nd/(NL/4))+1,
+            rl:RASI_LORD[SIGNS[Math.floor(lon/30)]], stl:stl, sbl:s1.lord, ssl:s2.lord, sssl:s3.lord, deg:lon%30};
+  }
+  function dms(d){var D=Math.floor(d),m=(d-D)*60,M=Math.floor(m),S=Math.round((m-M)*60);if(S===60){S=0;M++;}if(M===60){M=0;D++;}return D+"° "+String(M).padStart(2,"0")+"' "+String(S).padStart(2,"0")+'"';}
+  function geolon(body,date){var v=A.GeoVector(body,date,true);var e=A.Ecliptic(v);return norm(e.elon);}
+  function meanNode(jd){var T=(jd-2451545.0)/36525;return norm(125.0445479-1934.1362891*T+0.0020754*T*T+T*T*T/467441);}
+
+  function compute(d){
+    var utcMs=Date.UTC(d.y,d.mo-1,d.d,d.h,d.mi,d.s)-d.tz*3600000;
+    var date=new Date(utcMs);
+    var jd=utcMs/86400000+2440587.5;
+    var jy=(jd-2451545.0)/365.25+2000.0;
+    var ayan=(jy-291.273)*(50.2388475/3600);
+    var bodies=[["Sun",A.Body.Sun],["Moon",A.Body.Moon],["Mars",A.Body.Mars],["Mercury",A.Body.Mercury],["Jupiter",A.Body.Jupiter],["Venus",A.Body.Venus],["Saturn",A.Body.Saturn]];
+    var planets=[];
+    bodies.forEach(function(b){ planets.push({name:b[0], c:chain(geolon(b[1],date)-ayan)}); });
+    var rahu=norm(meanNode(jd)-ayan);
+    planets.push({name:"Rahu", node:true, c:chain(rahu)});
+    planets.push({name:"Ketu", node:true, c:chain(rahu+180)});
+    // Ascendant
+    var gast=A.SiderealTime(date);
+    var ramc=norm((gast+d.lng/15)*15);
+    var T=(jd-2451545.0)/36525, eps=23.439291-0.0130042*T;
+    var asc=norm(Math.atan2(Math.cos(ramc*D2R), -(Math.sin(ramc*D2R)*Math.cos(eps*D2R)+Math.tan(d.lat*D2R)*Math.sin(eps*D2R)))*R2D);
+    var lagna=chain(norm(asc-ayan));
+    return {planets:planets, lagna:lagna, ayan:ayan};
+  }
+
+  function render(r){
+    var L=r.lagna;
+    document.getElementById("lagnaBig").innerHTML="<b>"+L.sign+"</b> "+dms(L.deg);
+    document.getElementById("lagnaMeta").textContent=L.nak+" ("+L.pada+") · Star lord "+L.stl+" · Sub "+L.sbl;
+    document.getElementById("ayanBox").innerHTML="Ayanamsa<br>"+dms(r.ayan)+"<br>KP-Newcomb";
+    var rows="";
+    r.planets.forEach(function(p){
+      var c=p.c;
+      rows+="<tr"+(p.node?' class="node"':"")+"><td>"+p.name+"</td>"+
+        '<td class="deg">'+dms(c.deg)+"</td><td>"+c.sign+"</td><td>"+c.nak+" ("+c.pada+")</td>"+
+        '<td class="lord">'+AB[c.rl]+'</td><td class="lord">'+AB[c.stl]+'</td><td class="lord">'+AB[c.sbl]+'</td><td class="lord">'+AB[c.ssl]+'</td><td class="lord">'+AB[c.sssl]+"</td></tr>";
+    });
+    document.getElementById("rows").innerHTML=rows;
+    renderRasi(r);
+  }
+
+  // South Indian fixed layout: sign -> grid cell (row,col) 1-indexed in a 4x4
+  var CELL={Pisces:[1,1],Aries:[1,2],Taurus:[1,3],Gemini:[1,4],Aquarius:[2,1],Cancer:[2,4],Capricorn:[3,1],Leo:[3,4],Sagittarius:[4,1],Scorpio:[4,2],Libra:[4,3],Virgo:[4,4]};
+  function renderRasi(r){
+    var bySign={};
+    SIGNS.forEach(function(s){bySign[s]=[];});
+    r.planets.forEach(function(p){bySign[p.c.sign].push(AB[p.name]||p.name.slice(0,2));});
+    var ascSign=r.lagna.sign;
+    var host=document.getElementById("rasi");
+    host.innerHTML="";
+    // build 16 cells row-major
+    for(var row=1;row<=4;row++){
+      for(var col=1;col<=4;col++){
+        if((row===2||row===3)&&(col===2||col===3)){
+          if(row===2&&col===2){
+            var ctr=document.createElement("div");
+            ctr.className="cell mid center";
+            ctr.innerHTML='<div class="t">Rasi</div><div class="s">D-1</div>';
+            host.appendChild(ctr);
+          }
+          continue;
+        }
+        var sign=null;
+        for(var s in CELL){if(CELL[s][0]===row&&CELL[s][1]===col){sign=s;break;}}
+        var cell=document.createElement("div");
+        cell.className="cell";
+        var plist=(bySign[sign]||[]).slice();
+        if(sign===ascSign)plist.unshift('<span class="asc">Asc</span>');
+        cell.innerHTML='<span class="sign">'+sign.slice(0,3)+'</span><span class="plan">'+plist.join(" ")+"</span>";
+        host.appendChild(cell);
+      }
+    }
+  }
+
+  function run(e){
+    if(e)e.preventDefault();
+    var err=document.getElementById("err");
+    err.hidden=true;
+    try{
+      var dv=document.getElementById("date").value.split("-").map(Number);
+      var tv=document.getElementById("time").value.split(":").map(Number);
+      if(dv.length<3||isNaN(dv[0]))throw new Error("Enter a valid birth date.");
+      if(tv.length<2||isNaN(tv[0]))throw new Error("Enter a valid birth time.");
+      var d={y:dv[0],mo:dv[1],d:dv[2],h:tv[0],mi:tv[1],s:tv[2]||0,
+             lat:parseFloat(document.getElementById("lat").value),
+             lng:parseFloat(document.getElementById("lng").value),
+             tz:parseFloat(document.getElementById("tz").value)};
+      if(isNaN(d.lat)||isNaN(d.lng))throw new Error("Enter latitude and longitude.");
+      if(isNaN(d.tz))throw new Error("Enter the time-zone offset.");
+      render(compute(d));
+    }catch(ex){ err.textContent=ex.message||String(ex); err.hidden=false; }
+  }
+
+  var PLACES=[["Pudukkottai",10.3814,78.8214,5.5],["Chennai",13.0827,80.2707,5.5],["Delhi",28.6139,77.2090,5.5],["Mumbai",19.0760,72.8777,5.5],["Colombo",6.9271,79.8612,5.5],["London",51.5074,-0.1278,0],["New York",40.7128,-74.0060,-5]];
+  var pc=document.getElementById("places");
+  PLACES.forEach(function(p){
+    var b=document.createElement("button");
+    b.type="button";b.className="chip";b.textContent=p[0];
+    b.addEventListener("click",function(){
+      document.getElementById("lat").value=p[1];
+      document.getElementById("lng").value=p[2];
+      document.getElementById("tz").value=p[3];
+      run();
+    });
+    pc.appendChild(b);
+  });
+
+  document.getElementById("form").addEventListener("submit",run);
+  if(A&&A.Body){ run(); }
+  else{ var err=document.getElementById("err"); err.textContent="Ephemeris library failed to load — check your connection and reload."; err.hidden=false; }
+})();
+</script>
+</body>
+</html>

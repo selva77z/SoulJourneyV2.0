@@ -93,10 +93,22 @@ function getFullKPChain(nakDeg) {
 }
 
 // Calculate Date object from birth data
+// Accepts birthDate as either ISO "YYYY-MM-DD" (from <input type="date">) or "DD/MM/YYYY"
 function calculateDateTime(birthDate, birthTime, timezoneOffset = 5.5) {
-  const [day, month, year] = birthDate.split('/').map(Number);
+  let day, month, year;
+  if (birthDate.includes('-')) {
+    // ISO format YYYY-MM-DD
+    [year, month, day] = birthDate.split('-').map(Number);
+  } else {
+    // DD/MM/YYYY
+    [day, month, year] = birthDate.split('/').map(Number);
+  }
   const [hours, minutes, seconds = 0] = birthTime.split(':').map(Number);
-  
+
+  if ([day, month, year, hours, minutes].some(Number.isNaN)) {
+    throw new Error(`Invalid birth date/time: "${birthDate}" "${birthTime}"`);
+  }
+
   // Create local time
   const localTime = new Date(year, month - 1, day, hours, minutes, seconds);
   
@@ -217,16 +229,15 @@ function calculateKPPlanets(birthDate, birthTime, location) {
       
       try {
         if (planetName === "Rahu") {
-          // Calculate lunar node (Rahu) using Moon position approximation
-          const moonBody = astronomy.Body.Moon;
-          const moonPos = astronomy.EclipticLongitude(moonBody, dateTime);
-          // Simplified lunar node calculation - approximate for now
-          longitude = (moonPos + 180) % 360; // Simplified calculation
+          // Rahu = mean lunar ascending node (KP standard uses the mean node)
+          const jd = calculateJulianDay(dateTime);
+          const T = (jd - 2451545.0) / 36525;
+          longitude = (calculateRahuLongitude(T) + 360) % 360;
         } else if (planetName === "Ketu") {
-          // Ketu is 180° opposite to Rahu
-          const moonBody = astronomy.Body.Moon;
-          const moonPos = astronomy.EclipticLongitude(moonBody, dateTime);
-          longitude = moonPos % 360; // Simplified calculation
+          // Ketu is 180° opposite to Rahu (mean node)
+          const jd = calculateJulianDay(dateTime);
+          const T = (jd - 2451545.0) / 36525;
+          longitude = (calculateRahuLongitude(T) + 180 + 360) % 360;
         } else {
           // Get ecliptic longitude for other planets
           const bodyEnum = astronomy.Body[planetName];
@@ -255,7 +266,7 @@ function calculateKPPlanets(birthDate, birthTime, location) {
       const seconds = Math.floor(((degreesInSign % 1) * 60 % 1) * 60);
       
       // Calculate nakshatra
-      const nakIndex = Math.floor(siderealLon / NAK_LENGTH);
+      const nakIndex = Math.min(Math.max(Math.floor(siderealLon / NAK_LENGTH), 0), NAKSHATRAS.length - 1);
       const [nakshatra, starLord] = NAKSHATRAS[nakIndex];
       const nakDeg = siderealLon % NAK_LENGTH;
       const pada = Math.floor(nakDeg / (NAK_LENGTH / 4)) + 1;

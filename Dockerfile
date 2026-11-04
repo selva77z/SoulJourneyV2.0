@@ -48,6 +48,10 @@ COPY --from=builder /app/dist ./dist
 # This ensures helper scripts like find_ayanamsa_zero.py are also present
 COPY --from=builder /app/server/*.py ./server/
 
+# Copy the SQLite database (schema + any seed data) so the app has its tables
+# when running with the SQLite data layer (no Firebase credentials configured).
+COPY --from=builder /app/local.db ./local.db
+
 # Environment setup
 ENV NODE_ENV=production
 ENV PORT=5000

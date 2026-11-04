@@ -1,0 +1,10 @@
+# Core calculation engine — Swiss Ephemeris Python wrapper.
+pyswisseph>=2.10.3
+
+# Modern desktop GUI.
+customtkinter>=5.2.2
+
+# Optional: LLM-powered natural-language search.
+# The app runs without it (falls back to the built-in rule-based parser),
+# so install only if you want Claude to interpret free-form queries.
+anthropic>=0.39.0
